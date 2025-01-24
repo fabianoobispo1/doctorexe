@@ -11,10 +11,8 @@ import { Toaster } from '@/components/ui/toaster'
 import ThemeProvider from '@/components/layout/ThemeToggle/theme-provider'
 
 export const metadata: Metadata = {
-  title: 'Doctor exe',
-  description: 'Página oficial do time Doctor exe',
-  keywords:
-    'imperadores, Doctor exe, jfimperadores, futebolamericano, futebol ameriacno, fabr, juiz de fora imperadores, time imperadores, time jfimperadores, time Doctor exe',
+  title: 'DoctorExe',
+  description: 'Página inicial do DoctorExe',
 }
 
 export default async function RootLayout({
