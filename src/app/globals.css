@@ -1,0 +1,126 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210, 40%, 98%;
+    --foreground: 220, 20%, 20%;
+    --card: 200, 30%, 96%;
+    --card-foreground: 39 5% 10%;
+    --popover: 39 100% 95%;
+    --popover-foreground: 39 100% 0%;
+    --primary: 196, 85%, 46%;
+    --primary-foreground: 0, 0%, 100%;
+    --secondary: 182, 40%, 55%;
+    --secondary-foreground: 0, 0%, 100%;
+    --muted: 210, 20%, 90%;
+    --muted-foreground: 39 5% 35%;
+    --accent: 142, 40%, 45%;
+    --accent-foreground: 39 5% 10%;
+    --destructive: 0, 85%, 45%;
+    --destructive-foreground: 39 5% 90%;
+    --border: 200, 25%, 85%;
+    --input: 39 30% 18%;
+    --ring: 39 77% 34.1%;
+    --radius: 0.5rem;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+    --primary-hover: 196, 85%, 40%;
+  }
+  .dark {
+    --background: 215, 35%, 15%; /* Azul escuro profissional */
+    --foreground: 210, 20%, 98%; /* Texto claro suave */
+    --card: 215, 30%, 20%; /* Cartões em azul escuro */
+    --card-foreground: 39 5% 90%;
+    --popover: 39 50% 5%;
+    --popover-foreground: 39 5% 90%;
+    --primary: 196, 85%, 40%; /* Azul médico mais escuro */
+    --primary-foreground: 0, 0%, 100%;
+    --secondary: 182, 40%, 45%; /* Verde-azulado mais escuro */
+    --secondary-foreground: 0, 0%, 100%;
+    --muted: 215, 25%, 25%; /* Azul acinzentado escuro */
+    --muted-foreground: 39 5% 60%;
+    --accent: 142, 35%, 40%; /* Verde médico escuro */
+    --accent-foreground: 39 5% 90%;
+    --destructive: 0, 75%, 40%; /* Vermelho médico escuro */
+    --destructive-foreground: 39 5% 90%;
+    --border: 215, 25%, 25%;
+    --input: 39 30% 18%;
+    --ring: 39 77% 34.1%;
+    --radius: 0.5rem;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+    --primary-hover: 196, 85%, 35%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply box-border bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .min-h-screen {
+    min-height: 100vh; /* Fallback */
+    min-height: 100dvh;
+  }
+  .h-screen {
+    height: 100vh; /* Fallback */
+    height: 100dvh;
+  }
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/inter/static/inter-Regular.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/inter/static/inter-Thin.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: italic;
+}
+
+/* Aplica a fonte Inter globalmente */
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Adicione outras classes específicas, se necessário */
+.font-inter {
+  font-family: 'Inter', sans-serif;
+}
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply hover:bg-primary/90 transition-colors;
+  }
+}
