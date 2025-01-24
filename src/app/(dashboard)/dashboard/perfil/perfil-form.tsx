@@ -3,7 +3,6 @@ import * as z from 'zod'
 import { useCallback, useEffect, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import { fetchMutation, fetchQuery } from 'convex/nextjs'
 import { useSession } from 'next-auth/react'
 import { compare, hash } from 'bcryptjs'
 
@@ -24,9 +23,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useUploadFile } from '@/hooks/use-upload-file'
 import { FileUploaderButton } from '@/components/file-uploader-button'
-
-import { api } from '../../../../../convex/_generated/api'
-import type { Id } from '../../../../../convex/_generated/dataModel'
+import { api } from '@/lib/axios'
 
 const formSchema = z
   .object({
@@ -85,7 +82,7 @@ export const PerfilForm: React.FC = () => {
   const [loadingData, setLoadingData] = useState(true)
   const [bloqueioProvider, setBloqueioProvider] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [sessionId, setSessionId] = useState('')
+
   const [img, setImg] = useState('')
   const [imgKey, setImgKey] = useState('')
   const [passwordHash, setPasswordHash] = useState('1')
@@ -112,39 +109,40 @@ export const PerfilForm: React.FC = () => {
   const loadUser = useCallback(async () => {
     setLoadingData(true)
     console.log('entrou no loadUser')
-    console.log(sessionId)
+    console.log(session)
     if (session) {
       console.log(session.user.id)
       try {
-        const response = await fetchQuery(api.user.getById, {
-          userId: session.user.id as Id<'user'>,
+        const response = await api.post('/doctorexe/perfil/id', {
+          id: session.user.id,
         })
+
         console.log(response)
         if (!response) {
           console.error('Erro ao buscar os dados do usuário:')
           return
         }
 
-        if (response.provider !== 'credentials') {
+        if (response.data.doctorExeUsuario.provider !== 'credentials') {
           setBloqueioProvider(true)
         }
         // Atualiza os valores do formulário com os dados da API
-        setImg(response.image ?? '')
-        setImgKey(response.image_key ?? '')
-        setPasswordHash(response.password)
-        setEmailAtual(response.email)
+        setImg(response.data.doctorExeUsuario.image ?? '')
+        setImgKey(response.data.doctorExeUsuario.image_key ?? '')
+        setPasswordHash(response.data.doctorExeUsuario.password)
+        setEmailAtual(response.data.doctorExeUsuario.email)
         form.reset({
-          id: response._id,
-          nome: response.nome,
-          email: response.email,
-          data_nascimento: response.data_nascimento
-            ? new Date(response.data_nascimento)
+          id: response.data.doctorExeUsuario._id,
+          nome: response.data.doctorExeUsuario.nome,
+          email: response.data.doctorExeUsuario.email,
+          data_nascimento: response.data.doctorExeUsuario.data_nascimento
+            ? new Date(response.data.doctorExeUsuario.data_nascimento)
             : undefined,
-          image: response.image ?? '',
+          image: response.data.doctorExeUsuario.image ?? '',
           oldPassword: '',
           password: '',
           confirmPassword: '',
-          provider: response.provider,
+          provider: response.data.doctorExeUsuario.provider,
         })
       } catch (error) {
         console.error('Erro ao buscar os dados do usuário:', error)
@@ -152,17 +150,16 @@ export const PerfilForm: React.FC = () => {
         setLoadingData(false) // Define o carregamento como concluído
       }
     }
-  }, [sessionId, session, form])
+  }, [session, form])
 
   useEffect(() => {
     if (session) {
       if (!carregou) {
-        setSessionId(session.user.id)
         loadUser()
         setiscarregou(true)
       }
     }
-  }, [setSessionId, session, setiscarregou, carregou, loadUser])
+  }, [session, setiscarregou, carregou, loadUser])
 
   useEffect(() => {
     if (uploadedFiles.length > 0) {
@@ -196,11 +193,11 @@ export const PerfilForm: React.FC = () => {
     // verifica email
     if (emailAtual !== data.email) {
       // se for alterado, precisa verificar se ja exsite o cadastro
-      const emailExists = await fetchQuery(api.user.getByEmail, {
+      const response = await api.post('/doctorexe/perfil/email', {
         email: data.email,
       })
 
-      if (emailExists) {
+      if (response.data.email) {
         toast({
           title: 'Erro',
           variant: 'destructive',
@@ -215,7 +212,18 @@ export const PerfilForm: React.FC = () => {
       ? new Date(data.data_nascimento).getTime()
       : 0
 
-    await fetchMutation(api.user.UpdateUser, {
+    const dataToSend = {
+      id: data.id,
+      email: data.email,
+      image: img,
+      nome: data.nome,
+      data_nascimento: timestamp,
+      provider: data.provider,
+      image_key: imgKey,
+      password,
+    }
+    console.log(dataToSend)
+    /*     await fetchMutation(api.user.UpdateUser, {
       userId: data.id as Id<'user'>,
       email: data.email,
       image: data.image,
@@ -224,7 +232,7 @@ export const PerfilForm: React.FC = () => {
       provider: data.provider,
       image_key: imgKey,
       password,
-    })
+    }) */
 
     toast({
       title: 'ok',
