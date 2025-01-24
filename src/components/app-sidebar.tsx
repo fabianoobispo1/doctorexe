@@ -60,11 +60,11 @@ const items = [
     icon: UserPen,
   },
 
-  /*   {
-    title: 'Mensalidade - TESTE',
-    url: '/dashboard/mensalidade',
-    icon: User,
-  }, */
+  {
+    title: 'Avaliações',
+    url: '/dashboard/avaliacoes',
+    icon: UserPen,
+  },
 ]
 const itemsAdm = [
   {
