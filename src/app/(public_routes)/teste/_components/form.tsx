@@ -1,6 +1,7 @@
 'use client'
 
 import { useFormState } from 'react-dom'
+import Image from 'next/image'
 
 import { submitFormAction } from '../actions'
 
@@ -28,7 +29,9 @@ export function UploadForm() {
 
       <hr />
 
-      {state.url && <img src={state.url} alt={state.url} />}
+      {state.url && (
+        <Image src={state.url} alt={state.url} width={500} height={300} />
+      )}
     </form>
   )
 }
