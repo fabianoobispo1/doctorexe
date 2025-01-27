@@ -1,6 +1,12 @@
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
+  env: {
+    MINIO_ENDPOINT: process.env.MINIO_ENDPOINT,
+    MINIO_BUCKET: process.env.MINIO_BUCKET,
+    MINIO_ACCESS_KEY: process.env.MINIO_ACCESS_KEY,
+    MINIO_SECRET_KEY: process.env.MINIO_SECRET_KEY,
+  },
   images: {
     remotePatterns: [
       {
@@ -33,7 +39,13 @@ const nextConfig: NextConfig = {
         hostname: 'strong-reindeer-272.convex.cloud',
         pathname: '/**', // Permite qualquer caminho
       },
+      {
+        protocol: 'https',
+        hostname: 'minioapi.fabianoobispo.com.br', // adicione seu domínio MinIO
+        pathname: '/**',
+      },
     ],
   },
 }
+
 export default nextConfig

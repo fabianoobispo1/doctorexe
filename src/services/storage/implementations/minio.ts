@@ -1,36 +1,41 @@
 import S3 from 'aws-sdk/clients/s3'
 
 import type { IStorageProvider } from '../interface'
+import { CONFIG } from '../config'
 
 export class MinioStorageProvider implements IStorageProvider {
   client: S3
 
   constructor() {
     this.client = new S3({
-      endpoint: process.env.MINIO_ENDPOINT,
+      endpoint: CONFIG.providers.storage.endpoint,
       apiVersion: 'latest',
-      accessKeyId: process.env.MINIO_ACCESS_KEY,
-      secretAccessKey: process.env.MINIO_SECRET_KEY,
+      accessKeyId: CONFIG.providers.storage.accessKeyId,
+      secretAccessKey: CONFIG.providers.storage.secretAccessKey,
       signatureVersion: 'v4',
       s3ForcePathStyle: true,
     })
   }
 
-  async upload(file: File): Promise<string> {
+  async upload(file: File): Promise<{ url: string; key: string }> {
     // Converter o File/Blob para Buffer
     const buffer = await file.arrayBuffer().then(Buffer.from)
+    const key = `${Date.now()}-${file.name}` // Gerando key única
 
     const params = {
-      Bucket: process.env.MINIO_BUCKET as string,
-      Key: file.name,
+      Bucket: CONFIG.providers.storage.bucket as string,
+      Key: key,
       Body: buffer, // Usar o buffer ao invés do arquivo direto
       ACL: 'public-read',
       ContentType: file.type, // Adicionar o tipo do conteúdo
     }
 
     try {
-      const { Location } = await this.client.upload(params).promise()
-      return Location
+      const response = await this.client.upload(params).promise()
+      return {
+        url: response.Location,
+        key,
+      }
     } catch (error) {
       console.error('Upload error:', error)
       throw new Error('Erro ao fazer upload do arquivo')
@@ -39,7 +44,7 @@ export class MinioStorageProvider implements IStorageProvider {
 
   async delete(path: string): Promise<void> {
     const params = {
-      Bucket: process.env.MINIO_BUCKET as string,
+      Bucket: CONFIG.providers.storage.bucket as string,
       Key: path,
     }
 

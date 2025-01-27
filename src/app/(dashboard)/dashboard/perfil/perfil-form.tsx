@@ -4,8 +4,18 @@ import { useCallback, useEffect, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { useSession } from 'next-auth/react'
-import { compare, hash } from 'bcryptjs'
+import { AxiosError } from 'axios'
+import { format } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
+import { CalendarIcon } from 'lucide-react'
 
+import { Calendar } from '@/components/ui/calendar'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import { cn, formatCPF } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import {
@@ -16,90 +26,72 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import { DatePickerWithDropdown } from '@/components/calendar/with-dropdown'
 import { useToast } from '@/hooks/use-toast'
 import { Spinner } from '@/components/ui/spinner'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { useUploadFile } from '@/hooks/use-upload-file'
-import { FileUploaderButton } from '@/components/file-uploader-button'
 import { api } from '@/lib/axios'
 
-const formSchema = z
-  .object({
-    id: z.string(),
-    nome: z.string().min(3, { message: 'Nome precisa ser preenchido.' }),
-    data_nascimento: z.preprocess(
+import { ImageUpload } from './image-upload'
+
+const formSchema = z.object({
+  id: z.string().optional(),
+  nome: z.string().min(3, { message: 'Nome precisa ser preenchido.' }),
+  email: z.string().email({ message: 'Digite um email valido.' }),
+  cpf: z
+    .string({
+      required_error: 'CPF é obrigatório',
+      invalid_type_error: 'Formato de CPF inválido',
+    })
+    .min(1, 'CPF é obrigatório'),
+  data_nascimento: z.preprocess(
+    (val) => (val === null ? undefined : val), // Transforma null em undefined
+    z.date({
+      required_error: 'A data de nascimento precisa ser preenchida.',
+    }),
+  ),
+  image: z
+    .object({
+      url: z.string(),
+      key: z.string(),
+    })
+    .nullable()
+    .optional(),
+  /*  data_nascimento: z.preprocess(
       (val) => (val === null ? undefined : val), // Transforma null em undefined
       z.date({
         required_error: 'A data de nascimento precisa ser preenchida.',
       }),
     ),
-    email: z.string().email({ message: 'Digite um email valido.' }),
+  
     image: z.string().optional(),
     provider: z.string().optional(),
-    oldPassword: z
-      .string()
-      .min(8, { message: 'Senha obrigatória, min 8' })
-      .optional(),
-    password: z
-      .string()
-      .min(8, { message: 'Senha obrigatória, min 8' })
-      .optional(),
-    confirmPassword: z.string().optional(),
-  })
-  .refine((data) => !data.oldPassword || (data.oldPassword && data.password), {
-    message: 'Informe a nova senha.',
-    path: ['password'], // Aponta para o campo `password`
-  })
-  .refine((data) => !data.password || (data.password && data.confirmPassword), {
-    message:
-      'O campo de confirmação de senha é obrigatório quando a senha é preenchida.',
-    path: ['confirmPassword'], // Aponta para o campo `confirmPassword`
-  })
-  .refine(
-    (data) =>
-      !data.password ||
-      !data.confirmPassword ||
-      data.password === data.confirmPassword,
-    {
-      message: 'As senhas não coincidem.',
-      path: ['confirmPassword'], // Aponta para o campo `confirmPassword`
-    },
-  )
+    oldPassword: z.string().optional(),
+    password: z.string().optional(),
+    confirmPassword: z.string().optional(), */
+})
 
 type ProductFormValues = z.infer<typeof formSchema>
 
 export const PerfilForm: React.FC = () => {
-  const { onUpload, progresses, isUploading, uploadedFiles } = useUploadFile(
-    'imageUploader',
-    {
-      defaultUploadedFiles: [],
-    },
-  )
-
   const { data: session } = useSession()
   const [loadingData, setLoadingData] = useState(true)
   const [bloqueioProvider, setBloqueioProvider] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  const [img, setImg] = useState('')
-  const [imgKey, setImgKey] = useState('')
-  const [passwordHash, setPasswordHash] = useState('1')
-  const [emailAtual, setEmailAtual] = useState('')
   const [carregou, setiscarregou] = useState(false)
   const { toast } = useToast()
 
   const defaultValues = {
     id: '',
     nome: '',
-    data_nascimento: undefined,
     email: '',
-    imagee: '',
-    oldPassword: '',
+    cpf: '',
+    data_nascimento: undefined,
+    image: null,
+    /*  oldPassword: '',
     password: '',
     confirmPassword: '',
-    provider: '',
+    provider: '', */
   }
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(formSchema),
@@ -108,16 +100,14 @@ export const PerfilForm: React.FC = () => {
 
   const loadUser = useCallback(async () => {
     setLoadingData(true)
-    console.log('entrou no loadUser')
-    console.log(session)
     if (session) {
-      console.log(session.user.id)
       try {
         const response = await api.post('/doctorexe/perfil/id', {
           id: session.user.id,
         })
+        console.log('carregou usuario')
+        console.log(response.data.doctorExeUsuario)
 
-        console.log(response)
         if (!response) {
           console.error('Erro ao buscar os dados do usuário:')
           return
@@ -126,28 +116,32 @@ export const PerfilForm: React.FC = () => {
         if (response.data.doctorExeUsuario.provider !== 'credentials') {
           setBloqueioProvider(true)
         }
-        // Atualiza os valores do formulário com os dados da API
-        setImg(response.data.doctorExeUsuario.image ?? '')
-        setImgKey(response.data.doctorExeUsuario.image_key ?? '')
-        setPasswordHash(response.data.doctorExeUsuario.password)
-        setEmailAtual(response.data.doctorExeUsuario.email)
+
         form.reset({
-          id: response.data.doctorExeUsuario._id,
+          id: response.data.doctorExeUsuario.id,
           nome: response.data.doctorExeUsuario.nome,
           email: response.data.doctorExeUsuario.email,
           data_nascimento: response.data.doctorExeUsuario.data_nascimento
             ? new Date(response.data.doctorExeUsuario.data_nascimento)
             : undefined,
-          image: response.data.doctorExeUsuario.image ?? '',
+          cpf: response.data.doctorExeUsuario.cpf,
+          image: response.data.doctorExeUsuario.image
+            ? {
+                url: response.data.doctorExeUsuario.image,
+                key: response.data.doctorExeUsuario.image_key,
+              }
+            : null,
+
+          /*  
+        
           oldPassword: '',
           password: '',
-          confirmPassword: '',
-          provider: response.data.doctorExeUsuario.provider,
+          confirmPassword: '', */
         })
       } catch (error) {
         console.error('Erro ao buscar os dados do usuário:', error)
       } finally {
-        setLoadingData(false) // Define o carregamento como concluído
+        setLoadingData(false)
       }
     }
   }, [session, form])
@@ -161,19 +155,13 @@ export const PerfilForm: React.FC = () => {
     }
   }, [session, setiscarregou, carregou, loadUser])
 
-  useEffect(() => {
-    if (uploadedFiles.length > 0) {
-      setImg(uploadedFiles[0]?.url || '')
-      setImgKey(uploadedFiles[0]?.key || '')
-      form.setValue('image', uploadedFiles[0]?.url || '') // Exemplo de atualização do campo de imagem
-    }
-  }, [uploadedFiles, form])
-
   const onSubmit = async (data: ProductFormValues) => {
     setLoading(true)
+    console.log('update')
+    console.log(data)
 
-    let password = ''
-    if (data.oldPassword) {
+    /*   let password = '' */
+    /*    if (data.oldPassword) {
       const isMatch = await compare(data.oldPassword, passwordHash)
 
       if (!isMatch) {
@@ -189,102 +177,65 @@ export const PerfilForm: React.FC = () => {
       if (newPassword) {
         password = await hash(newPassword, 6)
       }
-    }
-    // verifica email
-    if (emailAtual !== data.email) {
-      // se for alterado, precisa verificar se ja exsite o cadastro
-      const response = await api.post('/doctorexe/perfil/email', {
-        email: data.email,
-      })
+    } */
 
-      if (response.data.email) {
+    /* 
+    const timestamp = data.data_nascimento
+      ? new Date(data.data_nascimento).getTime()
+      : 0 */
+
+    const dataToSend = {
+      email: data.email,
+      nome: data.nome,
+      cpf: data.cpf,
+      data_nascimento: data.data_nascimento
+        ? data.data_nascimento.toISOString()
+        : null,
+
+      image: data.image?.url,
+      image_key: data.image?.key,
+      /*  data_nascimento: timestamp,
+      provider: data.provider,
+      password,
+      image: data.image, */
+    }
+    console.log(dataToSend)
+
+    try {
+      if (session) {
+        const response = await api.patch(
+          '/doctorexe/perfil/update',
+          dataToSend,
+          {
+            headers: {
+              Authorization: `Bearer ${session.user.apiToken}`,
+            },
+          },
+        )
+        console.log(response)
+      }
+      toast({
+        title: 'ok',
+        description: 'Cadastro alterado.',
+      })
+      loadUser()
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
         toast({
           title: 'Erro',
           variant: 'destructive',
-          description: 'Email já cadastrado.',
+          description: error.response?.data?.message,
         })
-        setLoading(false)
-        return
+      } else {
+        toast({
+          title: 'Erro',
+          variant: 'destructive',
+          description: 'Erro Interno',
+        })
       }
     }
 
-    const timestamp = data.data_nascimento
-      ? new Date(data.data_nascimento).getTime()
-      : 0
-
-    const dataToSend = {
-      id: data.id,
-      email: data.email,
-      image: img,
-      nome: data.nome,
-      data_nascimento: timestamp,
-      provider: data.provider,
-      image_key: imgKey,
-      password,
-    }
-    console.log(dataToSend)
-    /*     await fetchMutation(api.user.UpdateUser, {
-      userId: data.id as Id<'user'>,
-      email: data.email,
-      image: data.image,
-      nome: data.nome,
-      data_nascimento: timestamp,
-      provider: data.provider,
-      image_key: imgKey,
-      password,
-    }) */
-
-    toast({
-      title: 'ok',
-      description: 'Cadastro alterado.',
-    })
-
-    form.reset({
-      oldPassword: '',
-      password: '',
-      confirmPassword: '',
-    })
     setLoading(false)
-  }
-
-  const removeImage = async () => {
-    removeFileFromUploadthing(imgKey)
-    setImg('')
-    setImgKey('')
-    form.setValue('image', '')
-  }
-
-  async function removeFileFromUploadthing(fileKey: string) {
-    const imageKey = fileKey.substring(fileKey.lastIndexOf('/') + 1)
-
-    fetch('/api/uploadthing/remove', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ imageKey }),
-    })
-      .then(async (res) => {
-        if (res.ok) {
-          toast({
-            variant: 'default',
-            description: 'Imagem removida.',
-          })
-        } else {
-          const errorData = await res.json()
-          toast({
-            variant: 'destructive',
-            description: errorData.message || 'Something went wrong',
-          })
-        }
-      })
-      .catch(() => {
-        toast({
-          variant: 'destructive',
-          description: 'Something went wrong',
-        })
-      })
-      .finally(() => {})
   }
 
   if (loadingData) {
@@ -299,41 +250,38 @@ export const PerfilForm: React.FC = () => {
           className="w-full space-y-8"
           autoComplete="off"
         >
-          <div className="flex flex-col gap-4  md:grid md:grid-cols-2 ">
+          {/*   <div className="flex flex-col gap-4 items-center">
             <Avatar className="h-32 w-32">
-              <AvatarImage src={img || ''} alt="Avatar" />
+              <AvatarImage src={form.getValues('image')} alt="Avatar" />
               <AvatarFallback>
                 {form.getValues('nome')?.[0] || '?'}
               </AvatarFallback>
             </Avatar>
-            {bloqueioProvider ? (
-              <></>
-            ) : (
-              <div className="flex flex-col gap-4">
-                {isUploading ? (
-                  <Spinner />
-                ) : (
-                  <FileUploaderButton
-                    progresses={progresses}
-                    onUpload={onUpload}
-                    disabled={isUploading}
-                  />
-                )}
-
-                <Button
-                  variant={'ghost'}
-                  className="border-2"
-                  type="button"
-                  onClick={removeImage}
-                >
-                  Remover Imagem
-                </Button>
-              </div>
-            )}
-          </div>
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={async (e) => {
+                if (e.target.files?.[0]) {
+                  const file = e.target.files[0]
+                  const storage = new MinioStorageProvider()
+                  try {
+                    const imageUrl = await storage.upload(file)
+                    form.setValue('image', imageUrl)
+                  } catch (error) {
+                    console.error(error)
+                    toast({
+                      title: 'Erro',
+                      variant: 'destructive',
+                      description: 'Erro ao fazer upload da imagem.',
+                    })
+                  }
+                }
+              }}
+            />
+          </div> */}
 
           <div className="flex flex-col gap-4 md:grid md:grid-cols-2">
-            <FormField
+            {/*  <FormField
               control={form.control}
               name="image"
               render={({ field }) => (
@@ -349,8 +297,24 @@ export const PerfilForm: React.FC = () => {
                   <FormMessage />
                 </FormItem>
               )}
-            />
+            /> */}
 
+            <FormField
+              control={form.control}
+              name="image"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <ImageUpload
+                      value={field.value ?? null}
+                      onChange={field.onChange}
+                      disabled={loading}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="id"
@@ -394,8 +358,68 @@ export const PerfilForm: React.FC = () => {
                 </FormItem>
               )}
             />
-
             <FormField
+              control={form.control}
+              name="cpf"
+              render={({ field: { onChange, value, ...field } }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>CPF</FormLabel>
+                  <FormControl>
+                    <Input
+                      disabled={loading}
+                      placeholder="000.000.000-00"
+                      value={value || ''}
+                      onChange={(e) => onChange(formatCPF(e.target.value))}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="data_nascimento"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>Data de Nascimento</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant={'outline'}
+                          className={cn(
+                            'w-full pl-3 text-left font-normal',
+                            !field.value && 'text-muted-foreground',
+                          )}
+                        >
+                          {field.value ? (
+                            format(field.value, 'PPP', { locale: ptBR })
+                          ) : (
+                            <span>Selecione uma data</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        disabled={(date) =>
+                          date > new Date() || date < new Date('1900-01-01')
+                        }
+                        initialFocus
+                        locale={ptBR}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {/*         <FormField
               control={form.control}
               name="data_nascimento"
               render={({ field }) => (
@@ -419,11 +443,12 @@ export const PerfilForm: React.FC = () => {
                       <FormLabel>Senha antiga</FormLabel>
                       <FormControl>
                         <Input
-                          autoComplete="off"
+                          autoComplete="new-password"
                           type="password"
                           placeholder=""
                           disabled={loading || bloqueioProvider}
                           {...field}
+                          name="new-password-field"
                         />
                       </FormControl>
                       <FormMessage />
@@ -471,8 +496,9 @@ export const PerfilForm: React.FC = () => {
                 />
               </>
             )}
+          
+ */}
           </div>
-
           <Button disabled={loading} className="ml-auto" type="submit">
             Salvar
           </Button>
