@@ -134,7 +134,37 @@ export function TodoList() {
 
   const toggleTodo = async (id: string) => {
     setLoadingTodo(true)
-    console.log(id)
+
+    if (session) {
+      try {
+        if (session) {
+          await api.get(`/doctorexechecktodo/${id}`, {
+            headers: {
+              Authorization: `Bearer ${session.user.apiToken}`,
+            },
+          })
+        }
+        /*        toast({
+          title: 'ok',
+          description: 'Alterado com sucesso.',
+        }) */
+      } catch (error: unknown) {
+        console.log(error)
+        if (error instanceof AxiosError) {
+          toast({
+            title: 'Erro',
+            variant: 'destructive',
+            description: error.response?.data?.message,
+          })
+        } else {
+          toast({
+            title: 'Erro',
+            variant: 'destructive',
+            description: 'Erro Interno',
+          })
+        }
+      }
+    }
 
     loadTodos()
     setLoadingTodo(false)
