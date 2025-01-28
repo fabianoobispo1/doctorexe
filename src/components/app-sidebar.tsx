@@ -5,7 +5,7 @@ import {
   Home,
   Settings,
   UserPen,
-  ChevronsLeftRightEllipsisIcon,
+  /*   ChevronsLeftRightEllipsisIcon, */
   NotebookPenIcon,
   /* + */
 
@@ -73,11 +73,11 @@ const itemsAdm = [
     url: '/dashboard/admin',
     icon: Settings,
   },
-  {
+  /*   {
     title: 'Configurar WhatsApp',
     url: '/dashboard/configwhatsapp',
     icon: ChevronsLeftRightEllipsisIcon,
-  },
+  }, */
 ]
 
 /* interface Usuario {

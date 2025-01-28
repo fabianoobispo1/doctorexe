@@ -1,7 +1,7 @@
 'use client'
 import { useCallback, useEffect, useState } from 'react'
-import { fetchMutation, fetchQuery } from 'convex/nextjs'
 import { useSession } from 'next-auth/react'
+import { AxiosError } from 'axios'
 
 import {
   Table,
@@ -12,14 +12,13 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Checkbox } from '@/components/ui/checkbox'
+import { api } from '@/lib/axios'
 
 import { ScrollArea, ScrollBar } from './ui/scroll-area'
 import { Spinner } from './ui/spinner'
-import { api } from '../../convex/_generated/api'
-import type { Id } from '../../convex/_generated/dataModel'
 
 interface User {
-  _id: Id<'user'>
+  id: string
   nome: string
   email: string
   role: 'user' | 'admin'
@@ -33,9 +32,25 @@ export function UsuariosAdministradores() {
 
   const loadUsuarios = useCallback(async () => {
     if (session) {
-      fetchQuery(api.user.getAllUserRole).then((result) => {
-        setusuarios(result)
-      })
+      try {
+        const response = await api.get('/doctorexelistarusuarios', {
+          headers: {
+            Authorization: `Bearer ${session.user.apiToken}`,
+          },
+        })
+
+        const usuariosOrdenados = response.data.doctorExeUsuario.sort(
+          (a: User, b: User) => a.nome.localeCompare(b.nome),
+        )
+
+        setusuarios(usuariosOrdenados)
+
+        if (!response) {
+          console.error('Erro ao buscar os dados do usuário:')
+        }
+      } catch (error) {
+        console.error('Erro ao buscar os dados do usuário:', error)
+      }
     }
   }, [session])
 
@@ -48,12 +63,34 @@ export function UsuariosAdministradores() {
     }
   }, [loadUsuarios, session, carregou, setiscarregou])
 
-  const toggleAdmin = async (id: Id<'user'>) => {
+  const toggleAdmin = async (id: string, role: string) => {
     setLoadingUsuario(true)
+    const dataToSend = {
+      docrotExeUsuario_id: id,
+      role,
+    }
+    try {
+      if (session) {
+        const response = await api.post(
+          'alterarusuarioadmindoctorexe',
+          dataToSend,
+          {
+            headers: {
+              Authorization: `Bearer ${session.user.apiToken}`,
+            },
+          },
+        )
+        console.log(response)
+      }
 
-    await fetchMutation(api.user.toggleUserRole, {
-      userId: id,
-    })
+      loadUsuarios()
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        console.log(error.response?.data?.message)
+      } else {
+        console.log('Erro Interno')
+      }
+    }
 
     loadUsuarios()
     setLoadingUsuario(false)
@@ -74,12 +111,17 @@ export function UsuariosAdministradores() {
           <TableBody>
             {usuarios ? (
               usuarios.map((usuario) => (
-                <TableRow key={usuario._id}>
+                <TableRow key={usuario.id}>
                   <TableCell className="text-center">
                     <Checkbox
                       disabled={loadingUsuario}
                       checked={usuario.role === 'admin'}
-                      onCheckedChange={() => toggleAdmin(usuario._id)}
+                      onCheckedChange={() =>
+                        toggleAdmin(
+                          usuario.id,
+                          usuario.role === 'admin' ? 'user' : 'admin',
+                        )
+                      }
                     />
                   </TableCell>
 

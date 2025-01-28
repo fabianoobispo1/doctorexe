@@ -5,7 +5,7 @@ import NextTopLoader from 'nextjs-toploader'
 
 import '@uploadthing/react/styles.css'
 import './globals.css'
-import ConvexClientProvider from '@/providers/ConvexClientProvider'
+
 import AuthProvider from '@/providers/AuthProvider'
 import { Toaster } from '@/components/ui/toaster'
 import ThemeProvider from '@/components/layout/ThemeToggle/theme-provider'
@@ -28,16 +28,15 @@ export default async function RootLayout({
       <body className={'font-inter overflow-hidden'}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <NextTopLoader showSpinner={false} />
-          <ConvexClientProvider>
-            <AuthProvider>
-              <Toaster />
-              <main className="">
-                {children}
-                <Analytics />
-                <SpeedInsights />
-              </main>
-            </AuthProvider>
-          </ConvexClientProvider>
+
+          <AuthProvider>
+            <Toaster />
+            <main className="">
+              {children}
+              <Analytics />
+              <SpeedInsights />
+            </main>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
