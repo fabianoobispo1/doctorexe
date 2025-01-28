@@ -1,9 +1,8 @@
 'use client'
 import { useCallback, useEffect, useState } from 'react'
 import { Trash } from 'lucide-react'
-import { fetchMutation, fetchQuery } from 'convex/nextjs'
 import { useSession } from 'next-auth/react'
-import { useMutation } from 'convex/react'
+import { AxiosError } from 'axios'
 
 import { Input } from '@/components/ui/input'
 import {
@@ -15,21 +14,20 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Checkbox } from '@/components/ui/checkbox'
+import { api } from '@/lib/axios'
+import { useToast } from '@/hooks/use-toast'
 
 import { LoadingButton } from './ui/loading-button'
 import { ScrollArea, ScrollBar } from './ui/scroll-area'
 import { Spinner } from './ui/spinner'
-import { api } from '../../convex/_generated/api'
-import type { Id } from '../../convex/_generated/dataModel'
 
 interface Todo {
-  _id: Id<'todo'>
-  _creationTime: number
+  id: string
   text: string
   isCompleted: boolean
   created_at: number
   updated_at: number
-  userId: Id<'user'>
+  userId: string
 }
 export function TodoList() {
   const [todos, setTodos] = useState<Todo[]>([])
@@ -39,19 +37,43 @@ export function TodoList() {
 
   const [loadingTodo, setLoadingTodo] = useState<boolean>(false)
 
-  const registerTodo = useMutation(api.todo.create)
+  const { toast } = useToast()
 
   const { data: session } = useSession()
 
   const loadTodos = useCallback(async () => {
     if (session) {
-      fetchQuery(api.todo.getTodoByUser, {
-        userId: session.user.id as Id<'user'>,
-      }).then((result) => {
-        setTodos(result)
-      })
+      try {
+        if (session) {
+          const response = await api.get('/doctorexelistartodos', {
+            headers: {
+              Authorization: `Bearer ${session.user.apiToken}`,
+            },
+          })
+          setTodos(response.data.TodoDoctorexe)
+        }
+        toast({
+          title: 'ok',
+          description: 'Cadastro alterado.',
+        })
+      } catch (error: unknown) {
+        console.log(error)
+        if (error instanceof AxiosError) {
+          toast({
+            title: 'Erro',
+            variant: 'destructive',
+            description: error.response?.data?.message,
+          })
+        } else {
+          toast({
+            title: 'Erro',
+            variant: 'destructive',
+            description: 'Erro Interno',
+          })
+        }
+      }
     }
-  }, [session])
+  }, [session, toast])
 
   useEffect(() => {
     if (session) {
@@ -67,13 +89,42 @@ export function TodoList() {
     }
 
     if (session) {
-      await registerTodo({
-        userId: session.user.id as Id<'user'>,
+      const dataToSend = {
         text: newTodo,
-        isCompleted: false,
-        created_at: new Date().getTime(),
-        updated_at: new Date().getTime(),
-      })
+      }
+
+      try {
+        if (session) {
+          const response = await api.post(
+            '/doctorexeregistratodo',
+            dataToSend,
+            {
+              headers: {
+                Authorization: `Bearer ${session.user.apiToken}`,
+              },
+            },
+          )
+          console.log(response)
+        }
+        toast({
+          title: 'ok',
+          description: 'Cadastro alterado.',
+        })
+      } catch (error: unknown) {
+        if (error instanceof AxiosError) {
+          toast({
+            title: 'Erro',
+            variant: 'destructive',
+            description: error.response?.data?.message,
+          })
+        } else {
+          toast({
+            title: 'Erro',
+            variant: 'destructive',
+            description: 'Erro Interno',
+          })
+        }
+      }
 
       setNewTodo('')
       setLoading(false)
@@ -81,22 +132,47 @@ export function TodoList() {
     }
   }
 
-  const toggleTodo = async (id: Id<'todo'>) => {
+  const toggleTodo = async (id: string) => {
     setLoadingTodo(true)
     console.log(id)
-
-    await fetchMutation(api.todo.toggleTodoCompletion, {
-      todoId: id,
-    })
 
     loadTodos()
     setLoadingTodo(false)
   }
 
-  const removeTodo = async (id: Id<'todo'>) => {
+  const removeTodo = async (id: string) => {
     setLoadingTodo(true)
 
-    await fetchMutation(api.todo.remove, { todoId: id })
+    if (session) {
+      try {
+        if (session) {
+          await api.delete(`/doctorexeremovertodo/${id}`, {
+            headers: {
+              Authorization: `Bearer ${session.user.apiToken}`,
+            },
+          })
+        }
+        toast({
+          title: 'ok',
+          description: 'Removido com sucesso.',
+        })
+      } catch (error: unknown) {
+        console.log(error)
+        if (error instanceof AxiosError) {
+          toast({
+            title: 'Erro',
+            variant: 'destructive',
+            description: error.response?.data?.message,
+          })
+        } else {
+          toast({
+            title: 'Erro',
+            variant: 'destructive',
+            description: 'Erro Interno',
+          })
+        }
+      }
+    }
 
     loadTodos()
     setLoadingTodo(false)
@@ -129,12 +205,12 @@ export function TodoList() {
           <TableBody>
             {todos ? (
               todos.map((todo) => (
-                <TableRow key={todo._id}>
+                <TableRow key={todo.id}>
                   <TableCell>{todo.text}</TableCell>
                   <TableCell className="text-center">
                     <Checkbox
                       checked={todo.isCompleted}
-                      onCheckedChange={() => toggleTodo(todo._id)}
+                      onCheckedChange={() => toggleTodo(todo.id)}
                     />
                   </TableCell>
                   <TableCell className="text-center">
@@ -144,14 +220,14 @@ export function TodoList() {
                     <LoadingButton
                       className="w-32"
                       loading={loadingTodo}
-                      onClick={() => toggleTodo(todo._id)}
+                      onClick={() => toggleTodo(todo.id)}
                     >
                       {todo.isCompleted ? 'Desfazer' : 'Completo'}
                     </LoadingButton>
                     <LoadingButton
                       loading={loadingTodo}
                       variant={'destructive'}
-                      onClick={() => removeTodo(todo._id)}
+                      onClick={() => removeTodo(todo.id)}
                     >
                       <Trash className="h-4 w-4" />
                     </LoadingButton>

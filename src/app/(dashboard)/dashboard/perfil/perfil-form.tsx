@@ -250,71 +250,23 @@ export const PerfilForm: React.FC = () => {
           className="w-full space-y-8"
           autoComplete="off"
         >
-          {/*   <div className="flex flex-col gap-4 items-center">
-            <Avatar className="h-32 w-32">
-              <AvatarImage src={form.getValues('image')} alt="Avatar" />
-              <AvatarFallback>
-                {form.getValues('nome')?.[0] || '?'}
-              </AvatarFallback>
-            </Avatar>
-            <Input
-              type="file"
-              accept="image/*"
-              onChange={async (e) => {
-                if (e.target.files?.[0]) {
-                  const file = e.target.files[0]
-                  const storage = new MinioStorageProvider()
-                  try {
-                    const imageUrl = await storage.upload(file)
-                    form.setValue('image', imageUrl)
-                  } catch (error) {
-                    console.error(error)
-                    toast({
-                      title: 'Erro',
-                      variant: 'destructive',
-                      description: 'Erro ao fazer upload da imagem.',
-                    })
-                  }
-                }
-              }}
-            />
-          </div> */}
-
+          <FormField
+            control={form.control}
+            name="image"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <ImageUpload
+                    value={field.value ?? null}
+                    onChange={field.onChange}
+                    disabled={loading}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <div className="flex flex-col gap-4 md:grid md:grid-cols-2">
-            {/*  <FormField
-              control={form.control}
-              name="image"
-              render={({ field }) => (
-                <FormItem className=" flex-col hidden">
-                  <FormLabel>Imagem</FormLabel>
-                  <FormControl>
-                    <Input
-                      disabled={loading}
-                      placeholder="URL da imagem"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            /> */}
-
-            <FormField
-              control={form.control}
-              name="image"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <ImageUpload
-                      value={field.value ?? null}
-                      onChange={field.onChange}
-                      disabled={loading}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
             <FormField
               control={form.control}
               name="id"

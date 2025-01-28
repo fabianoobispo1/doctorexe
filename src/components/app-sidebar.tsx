@@ -6,6 +6,7 @@ import {
   Settings,
   UserPen,
   ChevronsLeftRightEllipsisIcon,
+  NotebookPenIcon,
   /* + */
 
   /*  CircleDollarSign, */
@@ -49,11 +50,11 @@ const items = [
     url: '/dashboard',
     icon: Home,
   },
-  /*  {
+  {
     title: 'Lista de tarefas',
     url: '/dashboard/lista',
     icon: NotebookPenIcon,
-  }, */
+  },
   {
     title: 'Perfil',
     url: '/dashboard/perfil',
