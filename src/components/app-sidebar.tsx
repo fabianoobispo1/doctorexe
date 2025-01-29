@@ -7,6 +7,10 @@ import {
   UserPen,
   /*   ChevronsLeftRightEllipsisIcon, */
   NotebookPenIcon,
+  Users,
+  /*   ClipboardList,
+  ActivitySquare,
+  Calendar, */
   /* + */
 
   /*  CircleDollarSign, */
@@ -60,12 +64,26 @@ const items = [
     url: '/dashboard/perfil',
     icon: UserPen,
   },
-
   {
+    title: 'Pacientes',
+    url: '/dashboard/pacientes',
+    icon: Users,
+  },
+  /*   {
     title: 'Avaliações',
     url: '/dashboard/avaliacoes',
-    icon: UserPen,
+    icon: ClipboardList,
   },
+  {
+    title: 'Evolução',
+    url: '/dashboard/evolucao',
+    icon: ActivitySquare,
+  },
+  {
+    title: 'Agenda',
+    url: '/dashboard/agenda',
+    icon: Calendar,
+  }, */
 ]
 const itemsAdm = [
   {
