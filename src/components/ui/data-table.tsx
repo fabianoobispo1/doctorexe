@@ -20,17 +20,25 @@ import {
 import { Input } from './input'
 /* import { Button } from './button' */
 import { ScrollArea, ScrollBar } from './scroll-area'
+import { Button } from './button'
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
   searchKey: string
+  pagination: {
+    pageSize: number
+    pageCount: number
+    currentPage: number
+    onPageChange: (page: number) => void
+  }
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   searchKey,
+  pagination,
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
@@ -126,6 +134,28 @@ export function DataTable<TData, TValue>({
             Proxima
           </Button>
         </div> */}
+
+        <div className="flex items-center justify-end space-x-2 py-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => pagination.onPageChange(pagination.currentPage - 1)}
+            disabled={pagination.currentPage === 1}
+          >
+            Anterior
+          </Button>
+          <div className="text-sm">
+            Página {pagination.currentPage} de {pagination.pageCount}
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => pagination.onPageChange(pagination.currentPage + 1)}
+            disabled={pagination.currentPage === pagination.pageCount}
+          >
+            Próxima
+          </Button>
+        </div>
       </div>
     </>
   )

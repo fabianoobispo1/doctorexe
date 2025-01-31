@@ -53,10 +53,7 @@ export const columns: ColumnDef<Paciente>[] = [
       return formatPhoneNumber(row.getValue('telefone'))
     },
   },
-  {
-    accessorKey: 'email',
-    header: 'Email',
-  },
+
   {
     id: 'actions',
     cell: ({ row }) => {
