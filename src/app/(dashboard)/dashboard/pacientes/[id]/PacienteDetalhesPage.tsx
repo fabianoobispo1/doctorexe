@@ -87,15 +87,36 @@ export default function PacienteDetalhesPage({
               </div>
               <div>
                 <p className="text-sm font-medium">Telefone</p>
+                <p className="text-sm text-muted-foreground">{paciente.sexo}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Telefone</p>
                 <p className="text-sm text-muted-foreground">
                   {paciente.telefone}
                 </p>
               </div>
-
+              <div>
+                <p className="text-sm font-medium">Estado Civil</p>
+                <p className="text-sm text-muted-foreground">
+                  {paciente.estadoCivil}
+                </p>
+              </div>
               <div>
                 <p className="text-sm font-medium">Endereço</p>
                 <p className="text-sm text-muted-foreground">
                   {paciente.enderecoResidencial}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Bairro</p>
+                <p className="text-sm text-muted-foreground">
+                  {paciente.bairro}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Cidade</p>
+                <p className="text-sm text-muted-foreground">
+                  {paciente.cidade}
                 </p>
               </div>
             </CardContent>

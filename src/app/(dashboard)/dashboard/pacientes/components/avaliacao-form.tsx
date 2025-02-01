@@ -68,7 +68,7 @@ interface AvaliacaoFormProps {
 
 export function AvaliacaoForm({ pacienteId }: AvaliacaoFormProps) {
   const router = useRouter()
-
+  console.log({ pacienteId })
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -88,7 +88,7 @@ export function AvaliacaoForm({ pacienteId }: AvaliacaoFormProps) {
       // Aqui virá a integração com a API
       console.log({ pacienteId, ...data })
       toast.success('Avaliação cadastrada com sucesso!')
-      router.push(`/pacientes/${pacienteId}/avaliacoes`)
+      // router.push(`/pacientes/${pacienteId}/avaliacoes`)
     } catch (error) {
       console.error(error)
       toast.error('Erro ao cadastrar avaliação')

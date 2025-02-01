@@ -7,18 +7,19 @@ export const metadata: Metadata = {
   description: 'Cadastro de nova avaliação física',
 }
 
-export default function NovaAvaliacaoPage(/* {
+export default async function NovaAvaliacaoPage({
   params,
 }: {
-  params: { id: string }
-} */) {
+  params: Promise<{ id: string }>
+}) {
+  const id = (await params).id
   return (
     <div className="flex flex-col gap-4 p-6">
       <h1 className="text-3xl font-bold tracking-tight">
         Nova Avaliação Física
       </h1>
       <div className="rounded-md border p-4">
-        <AvaliacaoForm pacienteId={/* params.id */ '1'} />
+        <AvaliacaoForm pacienteId={id} />
       </div>
     </div>
   )
