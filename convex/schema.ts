@@ -39,7 +39,7 @@ export const avaliacaoFisioSchema = {
   sexo: v.string(),
   cidade: v.string(),
   bairro: v.string(),
-  profissao: v.string(),
+  empresa: v.string(),
   enderecoResidencial: v.string(),
   enderecoComercial: v.string(),
   naturalidade: v.string(),

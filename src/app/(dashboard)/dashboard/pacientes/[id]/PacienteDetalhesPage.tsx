@@ -19,7 +19,7 @@ export interface Paciente {
   sexo: string
   estadoCivil: string
   naturalidade: string
-  profissao: string
+  empresa: string
   telefone: string
   enderecoResidencial: string
   enderecoComercial: string

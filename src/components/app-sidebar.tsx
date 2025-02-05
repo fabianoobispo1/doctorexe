@@ -8,6 +8,7 @@ import {
   /*   ChevronsLeftRightEllipsisIcon, */
   NotebookPenIcon,
   Users,
+  Dumbbell,
   /*   ClipboardList,
   ActivitySquare,
   Calendar, */
@@ -68,6 +69,11 @@ const items = [
     title: 'Pacientes',
     url: '/dashboard/pacientes',
     icon: Users,
+  },
+  {
+    title: 'Exercícios',
+    url: '/dashboard/exercicios',
+    icon: Dumbbell,
   },
   /*   {
     title: 'Avaliações',

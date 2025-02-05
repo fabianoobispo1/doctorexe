@@ -36,7 +36,7 @@ const formSchema = z.object({
   sexo: z.string().min(1, 'Sexo é obrigatório'),
   cidade: z.string().min(2, 'Cidade é obrigatória'),
   bairro: z.string().min(2, 'Bairro é obrigatório'),
-  profissao: z.string().min(2, 'Profissão é obrigatória'),
+  empresa: z.string().min(2, 'Empresa é obrigatória'),
   enderecoResidencial: z.string().min(5, 'Endereço residencial é obrigatório'),
   enderecoComercial: z.string().optional(),
   naturalidade: z.string().min(2, 'Naturalidade é obrigatória'),
@@ -60,7 +60,7 @@ export function PacienteForm() {
       sexo: '',
       cidade: '',
       bairro: '',
-      profissao: '',
+      empresa: '',
       enderecoResidencial: '',
       enderecoComercial: '',
       naturalidade: '',
@@ -81,7 +81,7 @@ export function PacienteForm() {
         sexo: data.sexo,
         cidade: data.cidade,
         bairro: data.bairro,
-        profissao: data.profissao,
+        empresa: data.empresa,
         enderecoResidencial: data.enderecoResidencial,
         enderecoComercial: data.enderecoComercial,
         naturalidade: data.naturalidade,
@@ -225,12 +225,12 @@ export function PacienteForm() {
 
           <FormField
             control={form.control}
-            name="profissao"
+            name="empresa"
             render={({ field }) => (
               <FormItem className="px-2">
-                <FormLabel>Profissão</FormLabel>
+                <FormLabel>Empresa</FormLabel>
                 <FormControl>
-                  <Input placeholder="Profissão" {...field} />
+                  <Input placeholder="Empresa" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
