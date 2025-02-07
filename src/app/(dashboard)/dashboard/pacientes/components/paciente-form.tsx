@@ -33,6 +33,7 @@ const formSchema = z.object({
   nome: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres'),
   dataNascimento: z.string().min(1, 'Data de nascimento é obrigatória'),
   telefone: z.string().min(10, 'Telefone inválido'),
+  email: z.string().email('Email inválido'),
   sexo: z.string().min(1, 'Sexo é obrigatório'),
   cidade: z.string().min(2, 'Cidade é obrigatória'),
   bairro: z.string().min(2, 'Bairro é obrigatório'),
@@ -57,6 +58,7 @@ export function PacienteForm() {
       nome: '',
       dataNascimento: '',
       telefone: '',
+      email: '',
       sexo: '',
       cidade: '',
       bairro: '',
@@ -78,6 +80,7 @@ export function PacienteForm() {
         nome: data.nome,
         dataNascimento: data.dataNascimento,
         telefone: data.telefone,
+        email: data.email,
         sexo: data.sexo,
         cidade: data.cidade,
         bairro: data.bairro,
@@ -163,6 +166,20 @@ export function PacienteForm() {
                 <FormLabel>Telefone</FormLabel>
                 <FormControl>
                   <Input placeholder="(00) 00000-0000" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem className="px-2">
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input placeholder="email@email.com" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

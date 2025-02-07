@@ -53,6 +53,13 @@ export const columns: ColumnDef<Paciente>[] = [
       return formatPhoneNumber(row.getValue('telefone'))
     },
   },
+  {
+    accessorKey: 'email',
+    header: 'Email',
+    cell: ({ row }) => {
+      return row.getValue('email') || 'Não informado'
+    },
+  },
 
   {
     id: 'actions',
@@ -70,6 +77,11 @@ export const columns: ColumnDef<Paciente>[] = [
             <DropdownMenuItem>
               <Link href={`/dashboard/pacientes/${paciente.id}`}>
                 Ver detalhes
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Link href={`/dashboard/pacientes/${paciente.id}`}>
+                Editar ficha
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem>
