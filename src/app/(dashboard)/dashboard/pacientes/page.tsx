@@ -10,6 +10,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import BreadCrumb from '@/components/breadcrumb'
 import { Heading } from '@/components/ui/heading'
 import { api } from '@/lib/axios'
+import { Spinner } from '@/components/ui/spinner'
 
 import { columns } from './components/columns'
 
@@ -22,6 +23,7 @@ interface PaginationMeta {
 const breadcrumbItems = [{ title: 'Pacientes', link: '/dashboard/pacientes' }]
 export default function PacientesPage() {
   const { data: session } = useSession()
+  const [loading, setLoading] = useState(true)
   const [pacientes, setPacientes] = useState([])
   const [meta, setMeta] = useState<PaginationMeta>({
     page: 1,
@@ -32,6 +34,7 @@ export default function PacientesPage() {
   const loadPacientes = useCallback(
     async (page: number = 1) => {
       if (session) {
+        setLoading(true)
         const response = await api.get(`/doctorexe/pacientes?page=${page}`, {
           headers: {
             Authorization: `Bearer ${session.user.apiToken}`,
@@ -40,6 +43,7 @@ export default function PacientesPage() {
         console.log(response)
         setPacientes(response.data.pacientes)
         setMeta(response.data.meta)
+        setLoading(false)
       }
     },
     [session],
@@ -65,17 +69,23 @@ export default function PacientesPage() {
             </Button>
           </Link>
         </div>
-        <DataTable
-          searchKey="nome"
-          columns={columns}
-          data={pacientes}
-          pagination={{
-            pageSize: meta.perPage,
-            pageCount: Math.ceil(meta.total / meta.perPage),
-            currentPage: meta.page,
-            onPageChange: loadPacientes,
-          }}
-        />
+        {loading ? (
+          <div className="flex items-center justify-center">
+            <Spinner />
+          </div>
+        ) : (
+          <DataTable
+            searchKey="nome"
+            columns={columns}
+            data={pacientes}
+            pagination={{
+              pageSize: meta.perPage,
+              pageCount: Math.ceil(meta.total / meta.perPage),
+              currentPage: meta.page,
+              onPageChange: loadPacientes,
+            }}
+          />
+        )}
       </div>
     </ScrollArea>
   )

@@ -127,6 +127,9 @@ export default function PacienteDetalhesPage({
               <CardTitle>Ações</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-2">
+              <Link href={`/dashboard/pacientes/${paciente.id}/exercicios`}>
+                <Button className="w-full">Exercícios</Button>
+              </Link>
               <Link href={`/dashboard/pacientes/${paciente.id}/avaliacoes`}>
                 <Button className="w-full">Nova Avaliação</Button>
               </Link>

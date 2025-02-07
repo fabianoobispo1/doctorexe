@@ -55,7 +55,6 @@ export function ExercicioForm() {
   })
 
   async function onSubmit(data: FormValues) {
-    // Aqui virá a integração com a API
     console.log(data)
     setLoading(true)
 
