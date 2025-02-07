@@ -4,6 +4,8 @@ import Link from 'next/link'
 
 import { Button } from '@/components/ui/button'
 
+import { ExerciciosList } from './exercicios-list'
+
 /* import { AvaliacaoForm } from '../../../components/avaliacao-form'
  */
 export const metadata: Metadata = {
@@ -30,7 +32,7 @@ export default async function NovaAvaliacaoPage({
         </h1>
       </div>
       <div className="rounded-md border p-4">
-        {/* <AvaliacaoForm pacienteId={id} /> */}
+        <ExerciciosList pascienteId={id} />
       </div>
     </div>
   )

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { api } from '@/lib/axios'
 import { Spinner } from '@/components/ui/spinner'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 interface PacienteDetalhesPageProps {
   idPaciente: string
@@ -67,80 +68,86 @@ export default function PacienteDetalhesPage({
       {!paciente ? (
         <Spinner />
       ) : (
-        <div className="grid gap-4 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Informações Pessoais</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div>
-                <p className="text-sm font-medium">Nome</p>
-                <p className="text-sm text-muted-foreground">{paciente.nome}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium">Data de Nascimento</p>
-                <p className="text-sm text-muted-foreground">
-                  {new Date(paciente.dataNascimento).toLocaleDateString(
-                    'pt-BR',
-                  )}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm font-medium">Telefone</p>
-                <p className="text-sm text-muted-foreground">{paciente.sexo}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium">Telefone</p>
-                <p className="text-sm text-muted-foreground">
-                  {paciente.telefone}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm font-medium">Estado Civil</p>
-                <p className="text-sm text-muted-foreground">
-                  {paciente.estadoCivil}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm font-medium">Endereço</p>
-                <p className="text-sm text-muted-foreground">
-                  {paciente.enderecoResidencial}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm font-medium">Bairro</p>
-                <p className="text-sm text-muted-foreground">
-                  {paciente.bairro}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm font-medium">Cidade</p>
-                <p className="text-sm text-muted-foreground">
-                  {paciente.cidade}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+        <ScrollArea className="h-[calc(100vh-170px)]  w-full pr-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Informações Pessoais</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <div>
+                  <p className="text-sm font-medium">Nome</p>
+                  <p className="text-sm text-muted-foreground">
+                    {paciente.nome}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Data de Nascimento</p>
+                  <p className="text-sm text-muted-foreground">
+                    {new Date(paciente.dataNascimento).toLocaleDateString(
+                      'pt-BR',
+                    )}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Telefone</p>
+                  <p className="text-sm text-muted-foreground">
+                    {paciente.sexo}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Telefone</p>
+                  <p className="text-sm text-muted-foreground">
+                    {paciente.telefone}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Estado Civil</p>
+                  <p className="text-sm text-muted-foreground">
+                    {paciente.estadoCivil}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Endereço</p>
+                  <p className="text-sm text-muted-foreground">
+                    {paciente.enderecoResidencial}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Bairro</p>
+                  <p className="text-sm text-muted-foreground">
+                    {paciente.bairro}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Cidade</p>
+                  <p className="text-sm text-muted-foreground">
+                    {paciente.cidade}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Ações</CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-2">
-              <Link href={`/dashboard/pacientes/${paciente.id}/exercicios`}>
-                <Button className="w-full">Exercícios</Button>
-              </Link>
-              <Link href={`/dashboard/pacientes/${paciente.id}/avaliacoes`}>
-                <Button className="w-full">Nova Avaliação</Button>
-              </Link>
-              <Link href={`/dashboard/pacientes/${paciente.id}/historico`}>
-                <Button variant="outline" className="w-full">
-                  Ver Histórico
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        </div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Ações</CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-2">
+                <Link href={`/dashboard/pacientes/${paciente.id}/exercicios`}>
+                  <Button className="w-full">Exercícios</Button>
+                </Link>
+                <Link href={`/dashboard/pacientes/${paciente.id}/avaliacoes`}>
+                  <Button className="w-full">Nova Avaliação</Button>
+                </Link>
+                <Link href={`/dashboard/pacientes/${paciente.id}/historico`}>
+                  <Button variant="outline" className="w-full">
+                    Ver Histórico
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </div>
+        </ScrollArea>
       )}
     </div>
   )

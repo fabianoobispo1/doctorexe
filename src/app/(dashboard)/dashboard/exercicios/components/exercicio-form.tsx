@@ -83,6 +83,7 @@ export function ExercicioForm() {
           title: 'ok',
           description: 'Cadastro realizado.',
         })
+        form.reset()
       } catch (error: unknown) {
         if (error instanceof AxiosError) {
           toast({
