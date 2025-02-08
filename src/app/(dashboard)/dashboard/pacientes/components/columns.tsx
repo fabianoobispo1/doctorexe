@@ -80,7 +80,7 @@ export const columns: ColumnDef<Paciente>[] = [
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem>
-              <Link href={`/dashboard/pacientes/${paciente.id}`}>
+              <Link href={`/dashboard/pacientes/${paciente.id}/editar`}>
                 Editar ficha
               </Link>
             </DropdownMenuItem>
