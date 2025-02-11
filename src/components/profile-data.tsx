@@ -72,9 +72,9 @@ export function ProfileData() {
 
   return (
     <Card className="p-6">
-      <h3 className="text-2xl font-semibold mb-4">Dados do Perfil</h3>
+      <h3 className="text-2xl font-semibold mb-4">Ficha medica encontrada</h3>
       <div className="space-y-4">
-        <div>
+        {/*   <div>
           <p className="text-sm text-muted-foreground">Nome</p>
           <p className="font-medium">{profileData.nome}</p>
         </div>
@@ -93,7 +93,7 @@ export function ProfileData() {
         <div>
           <p className="text-sm text-muted-foreground">Gênero</p>
           <p className="font-medium">{profileData.genero}</p>
-        </div>
+        </div> */}
       </div>
     </Card>
   )

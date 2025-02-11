@@ -161,7 +161,7 @@ export function FaleConoscoList() {
               <TableHead className="text-center">Email</TableHead>
               <TableHead className="text-center">Telefone</TableHead>
               <TableHead className="text-center">Mensagem</TableHead>
-              <TableHead className="text-center">Feito</TableHead>
+              {/*    <TableHead className="text-center">Feito</TableHead> */}
               <TableHead className="text-center">Criado em</TableHead>
               <TableHead className="text-center">Opções</TableHead>
             </TableRow>
@@ -181,9 +181,9 @@ export function FaleConoscoList() {
                       onCheckedChange={() => toggleTodo(faleConosco.id)}
                     />
                   </TableCell>
-                  <TableCell className="text-center">
+                  {/*         <TableCell className="text-center">
                     {new Date(faleConosco.created_at).toLocaleDateString()}
-                  </TableCell>
+                  </TableCell> */}
                   <TableCell className="flex items-center justify-center gap-2">
                     {/*  <LoadingButton
                       className="w-32"

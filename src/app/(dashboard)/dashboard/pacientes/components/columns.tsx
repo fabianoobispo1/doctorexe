@@ -39,6 +39,14 @@ export const columns: ColumnDef<Paciente>[] = [
     },
   },
   {
+    accessorKey: 'empresa',
+    header: 'Empresa',
+    cell: ({ row }) => {
+      return row.getValue('empresa')
+    },
+  },
+
+  {
     accessorKey: 'dataNascimento',
     header: 'Data Nascimento',
     cell: ({ row }) => {
@@ -79,11 +87,11 @@ export const columns: ColumnDef<Paciente>[] = [
                 Ver detalhes
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem>
+            {/*   <DropdownMenuItem>
               <Link href={`/dashboard/pacientes/${paciente.id}/editar`}>
                 Editar ficha
               </Link>
-            </DropdownMenuItem>
+            </DropdownMenuItem> */}
             <DropdownMenuItem>
               <Link href={`/dashboard/pacientes/${paciente.id}/avaliacoes`}>
                 Avaliações
