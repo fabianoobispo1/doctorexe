@@ -6,7 +6,6 @@ import { useSession } from 'next-auth/react'
 
 import { Button } from '@/components/ui/button'
 import { DataTable } from '@/components/ui/data-table'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import BreadCrumb from '@/components/breadcrumb'
 import { Heading } from '@/components/ui/heading'
 import { api } from '@/lib/axios'
@@ -54,39 +53,34 @@ export default function PacientesPage() {
   }, [loadPacientes])
 
   return (
-    <ScrollArea className="h-full w-full">
-      <div className="flex-1 space-y-4 p-4 pt-6 ">
-        <BreadCrumb items={breadcrumbItems} />
-        <div className=" flex items-start justify-between gap-4">
-          <Heading
-            title={'Pacientes'}
-            description={'Gerenciar os pacientes.'}
-          />
-          <Link href="/dashboard/pacientes/novo">
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Novo Paciente
-            </Button>
-          </Link>
-        </div>
-        {loading ? (
-          <div className="flex items-center justify-center">
-            <Spinner />
-          </div>
-        ) : (
-          <DataTable
-            searchKey="nome"
-            columns={columns}
-            data={pacientes}
-            pagination={{
-              pageSize: meta.perPage,
-              pageCount: Math.ceil(meta.total / meta.perPage),
-              currentPage: meta.page,
-              onPageChange: loadPacientes,
-            }}
-          />
-        )}
+    <div className="flex-1 space-y-4 p-4 pt-6 ">
+      <BreadCrumb items={breadcrumbItems} />
+      <div className=" flex items-start justify-between gap-4">
+        <Heading title={'Pacientes'} description={'Gerenciar os pacientes.'} />
+        <Link href="/dashboard/pacientes/novo">
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            Novo Paciente
+          </Button>
+        </Link>
       </div>
-    </ScrollArea>
+      {loading ? (
+        <div className="flex items-center justify-center">
+          <Spinner />
+        </div>
+      ) : (
+        <DataTable
+          searchKey="nome"
+          columns={columns}
+          data={pacientes}
+          pagination={{
+            pageSize: meta.perPage,
+            pageCount: Math.ceil(meta.total / meta.perPage),
+            currentPage: meta.page,
+            onPageChange: loadPacientes,
+          }}
+        />
+      )}
+    </div>
   )
 }

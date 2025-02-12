@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { api } from '@/lib/axios'
 import { Spinner } from '@/components/ui/spinner'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 
 interface PacienteDetalhesPageProps {
   idPaciente: string
@@ -147,6 +147,7 @@ export default function PacienteDetalhesPage({
               </CardContent>
             </Card>
           </div>
+          <ScrollBar orientation="horizontal" />
         </ScrollArea>
       )}
     </div>
