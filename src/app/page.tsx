@@ -7,9 +7,7 @@ import {
   YoutubeIcon,
   WhatsAppIcon,
 } from '@/components/icons'
-import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
-import { Input } from '@/components/ui/input'
+import FaleConoscoForm from '@/components/forms/fale-conosco-form'
 
 export const metadata: Metadata = {
   title: 'DoctorExe',
@@ -114,7 +112,7 @@ export default function HomePage() {
         {/* WhatsApp Float Button */}
         <Link
           href="https://wa.me/+553299942252"
-          className="fixed bottom-6 right-6 bg-green-500 p-4 rounded-full shadow-lg hover:bg-green-600 transition-colors"
+          className="fixed bottom-6 right-6 bg-green-500 text-white p-2 rounded-full shadow-lg hover:bg-green-600 transition-colors flex items-center justify-center w-14 h-14"
           target="_blank"
         >
           <WhatsAppIcon />
@@ -122,28 +120,7 @@ export default function HomePage() {
 
         {/* Formulário de Contato */}
         <section className="py-16 bg-gray-100">
-          <div className="container mx-auto px-4 max-w-2xl">
-            <h2 className="text-3xl font-bold text-center mb-8">
-              Fale Conosco
-            </h2>
-            <form className="space-y-6">
-              <div>
-                <Input placeholder="Nome completo" />
-              </div>
-              <div>
-                <Input type="email" placeholder="E-mail" />
-              </div>
-              <div>
-                <Input placeholder="Telefone" />
-              </div>
-              <div>
-                <Textarea placeholder="Sua mensagem" className="h-32" />
-              </div>
-              <Button type="submit" className="w-full bg-blue-600">
-                Enviar Mensagem
-              </Button>
-            </form>
-          </div>
+          <FaleConoscoForm />
         </section>
       </main>
     </div>

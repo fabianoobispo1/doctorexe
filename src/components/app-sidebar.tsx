@@ -9,6 +9,7 @@ import {
   NotebookPenIcon,
   Users,
   Dumbbell,
+  Mail,
   /*   ClipboardList,
   ActivitySquare,
   Calendar, */
@@ -74,6 +75,11 @@ const items = [
     title: 'Exercícios',
     url: '/dashboard/exercicios',
     icon: Dumbbell,
+  },
+  {
+    title: 'Fale conosco',
+    url: '/dashboard/fale-conosco',
+    icon: Mail,
   },
   /*   {
     title: 'Avaliações',

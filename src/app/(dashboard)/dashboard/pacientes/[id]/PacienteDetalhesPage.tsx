@@ -3,6 +3,7 @@ import { useSession } from 'next-auth/react'
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -33,6 +34,7 @@ export default function PacienteDetalhesPage({
   idPaciente,
 }: PacienteDetalhesPageProps) {
   const { data: session } = useSession()
+  const router = useRouter()
   const [paciente, setPaciente] = useState<Paciente | null>(null)
 
   const loadPaciente = useCallback(
@@ -53,6 +55,16 @@ export default function PacienteDetalhesPage({
     loadPaciente(idPaciente)
   }, [loadPaciente, idPaciente])
 
+  const handleDeletePaciente = async () => {
+    if (session) {
+      await api.delete(`/doctorexe/pacientes/${idPaciente}`, {
+        headers: {
+          Authorization: `Bearer ${session.user.apiToken}`,
+        },
+      })
+      router.push('/dashboard/pacientes')
+    }
+  }
   return (
     <div className="flex flex-col gap-4 p-6">
       <div className="flex items-center gap-4">
@@ -79,6 +91,12 @@ export default function PacienteDetalhesPage({
                   <p className="text-sm font-medium">Nome</p>
                   <p className="text-sm text-muted-foreground">
                     {paciente.nome}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Empresa</p>
+                  <p className="text-sm text-muted-foreground">
+                    {paciente.empresa}
                   </p>
                 </div>
                 <div>
@@ -144,6 +162,30 @@ export default function PacienteDetalhesPage({
                     Ver Histórico
                   </Button>
                 </Link>
+
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" className="w-full">
+                      Remover ficha
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Esta ação não pode ser desfeita. Isso removerá
+                        permanentemente a ficha do paciente {paciente.nome} e
+                        todos os dados associados.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleDeletePaciente}>
+                        Confirmar
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </CardContent>
             </Card>
           </div>
