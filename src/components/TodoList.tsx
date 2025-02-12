@@ -225,7 +225,7 @@ export function TodoList() {
         <Table className="relative">
           <TableHeader>
             <TableRow>
-              <TableHead className="text-center">Tarefa</TableHead>
+              <TableHead className="text-center">Tarefas</TableHead>
               <TableHead className="text-center">Completou</TableHead>
               <TableHead className="text-center">Criado em</TableHead>
               <TableHead className="text-center">Opções</TableHead>
