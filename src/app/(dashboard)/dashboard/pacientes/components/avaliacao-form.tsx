@@ -17,47 +17,22 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 const formSchema = z.object({
   dataAvaliacao: z.string(),
-  // Identificação
-  nome: z.string(),
-  dataNascimento: z.string(),
-  telefone: z.string(),
-  sexo: z.string(),
-  cidade: z.string(),
-  bairro: z.string(),
-  empresa: z.string(),
-  enderecoResidencial: z.string(),
-  enderecoComercial: z.string(),
-  naturalidade: z.string(),
-  estadoCivil: z.string(),
-  diagnosticoClinico: z.string(),
-  diagnosticoFisioterapeutico: z.string(),
-  escalaEva: z.number().min(0).max(10),
-
-  // Avaliação
-  historiaClinica: z.string(),
-  queixaPrincipal: z.string(),
-  habitosVida: z.string(),
-  hma: z.string(),
-  hmp: z.string(),
-  antecedentePessoal: z.string(),
-  antecedenteFamiliar: z.string(),
-  tratamentosRealizados: z.string(),
-  altura: z.number(),
-  peso: z.number(),
+  altura: z.number().min(0),
+  peso: z.number().min(0),
   pressaoArterial: z.string(),
-  frequenciaCardiaca: z.number(),
+  frequenciaCardiaca: z.number().min(0),
+  diagnosticoFisioterapeutico: z.string(),
 
-  // Exame Clínico
-  apresentacaoPaciente: z.object({
-    deambulando: z.boolean(),
-    deambulandoComApoio: z.boolean(),
-    cadeiraRodas: z.boolean(),
-    internado: z.boolean(),
-    orientado: z.boolean(),
-  }),
+  semiologia: z.string(),
+  testesEspecificos: z.string(),
+  escalaEva: z.number().min(0).max(10),
+  objetivosTratamento: z.string(),
+  recursosTerapeuticos: z.string(),
+  planoTratamento: z.string(),
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -68,18 +43,11 @@ interface AvaliacaoFormProps {
 
 export function AvaliacaoForm({ pacienteId }: AvaliacaoFormProps) {
   const router = useRouter()
-  console.log({ pacienteId })
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       dataAvaliacao: new Date().toISOString().split('T')[0],
-      apresentacaoPaciente: {
-        deambulando: false,
-        deambulandoComApoio: false,
-        cadeiraRodas: false,
-        internado: false,
-        orientado: false,
-      },
     },
   })
 
@@ -96,222 +64,279 @@ export function AvaliacaoForm({ pacienteId }: AvaliacaoFormProps) {
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* Seção: Dados Básicos */}
-          <div className="col-span-2">
-            <h3 className="text-lg font-medium mb-4">Dados Básicos</h3>
-            <div className="grid gap-4 md:grid-cols-2">
-              <FormField
-                control={form.control}
-                name="dataAvaliacao"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Data da Avaliação</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+    <ScrollArea className="h-[calc(100vh-170px)]  w-full pr-4">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Dados Básicos */}
+            <div className="col-span-2">
+              <h3 className="text-lg font-medium mb-4">Dados da Avaliação</h3>
+              <div className="grid gap-4 md:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="dataAvaliacao"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Data da Avaliação</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
 
-              <FormField
-                control={form.control}
-                name="nome"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nome</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            {/* Sinais Vitais */}
+            <div className="col-span-2">
+              <h3 className="text-lg font-medium mb-4">Sinais Vitais</h3>
+              <div className="grid gap-4 md:grid-cols-4">
+                <FormField
+                  control={form.control}
+                  name="altura"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Altura (m)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(parseFloat(e.target.value))
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="dataNascimento"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Data de Nascimento</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="peso"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Peso (kg)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          step="0.1"
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(parseFloat(e.target.value))
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="telefone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Telefone</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="pressaoArterial"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Pressão Arterial</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="120/80" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="frequenciaCardiaca"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Freq. Cardíaca (bpm)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(parseInt(e.target.value))
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Avaliação Clínica */}
+            <div className="col-span-2">
+              <h3 className="text-lg font-medium mb-4">Avaliação Clínica</h3>
+              <div className="grid gap-4 md:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="diagnosticoFisioterapeutico"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Diagnóstico Fisioterapêutico</FormLabel>
+                      <FormControl>
+                        <Textarea {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="semiologia"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Semiologia</FormLabel>
+                      <FormControl>
+                        <Textarea {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="testesEspecificos"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Testes Específicos</FormLabel>
+                      <FormControl>
+                        <Textarea {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="col-span-2">
+                  <h3 className="text-lg font-medium mb-4">
+                    Escala de Dor (EVA)
+                  </h3>
+                  <FormField
+                    control={form.control}
+                    name="escalaEva"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Intensidade da Dor</FormLabel>
+                        <FormControl>
+                          <div className="flex gap-1">
+                            {[...Array(11)].map((_, index) => (
+                              <Button
+                                key={index}
+                                type="button"
+                                className={`
+                  w-12 h-12 font-bold transition-all
+                  ${field.value === index ? 'ring-2 ring-offset-2 ring-primary scale-110' : 'hover:scale-105'}
+                  ${
+                    index === 0
+                      ? 'bg-green-400 hover:bg-green-500'
+                      : index <= 3
+                        ? 'bg-yellow-300 hover:bg-yellow-400'
+                        : index <= 7
+                          ? 'bg-orange-400 hover:bg-orange-500'
+                          : 'bg-red-500 hover:bg-red-600'
+                  }
+                  ${field.value === index ? 'opacity-100' : 'opacity-70'}
+                `}
+                                onClick={() => field.onChange(index)}
+                              >
+                                {index}
+                              </Button>
+                            ))}
+                          </div>
+                        </FormControl>
+                        <div className="mt-4 flex justify-between text-sm text-muted-foreground">
+                          <span className="text-green-500">Sem dor (0)</span>
+                          <span className="text-yellow-500">
+                            Dor leve (1-3)
+                          </span>
+                          <span className="text-orange-500">
+                            Dor moderada (4-7)
+                          </span>
+                          <span className="text-red-500">
+                            Dor intensa (8-10)
+                          </span>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Plano de Tratamento */}
+            <div className="col-span-2">
+              <h3 className="text-lg font-medium mb-4">Plano de Tratamento</h3>
+              <div className="grid gap-4 md:grid-cols-1">
+                <FormField
+                  control={form.control}
+                  name="objetivosTratamento"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Objetivos do Tratamento</FormLabel>
+                      <FormControl>
+                        <Textarea {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="recursosTerapeuticos"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Recursos Terapêuticos</FormLabel>
+                      <FormControl>
+                        <Textarea {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="planoTratamento"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Plano de Tratamento</FormLabel>
+                      <FormControl>
+                        <Textarea {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Botões de ação */}
+            <div className="col-span-2 flex justify-end gap-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() =>
+                  router.push(`/dashboard/pacientes/${pacienteId}/avaliacoes`)
+                }
+              >
+                Cancelar
+              </Button>
+              <Button type="submit">Salvar Avaliação</Button>
             </div>
           </div>
-
-          {/* Seção: Dados Clínicos */}
-          <div className="col-span-2">
-            <h3 className="text-lg font-medium mb-4">Dados Clínicos</h3>
-            <div className="grid gap-4 md:grid-cols-2">
-              <FormField
-                control={form.control}
-                name="diagnosticoClinico"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Diagnóstico Clínico</FormLabel>
-                    <FormControl>
-                      <Textarea {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="diagnosticoFisioterapeutico"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Diagnóstico Fisioterapêutico</FormLabel>
-                    <FormControl>
-                      <Textarea {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="escalaEva"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Escala EVA (0-10)</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        min="0"
-                        max="10"
-                        {...field}
-                        onChange={(e) =>
-                          field.onChange(parseInt(e.target.value))
-                        }
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
-
-          {/* Seção: Sinais Vitais */}
-          <div className="col-span-2">
-            <h3 className="text-lg font-medium mb-4">Sinais Vitais</h3>
-            <div className="grid gap-4 md:grid-cols-4">
-              <FormField
-                control={form.control}
-                name="altura"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Altura (m)</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        {...field}
-                        onChange={(e) =>
-                          field.onChange(parseFloat(e.target.value))
-                        }
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="peso"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Peso (kg)</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        step="0.1"
-                        {...field}
-                        onChange={(e) =>
-                          field.onChange(parseFloat(e.target.value))
-                        }
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="pressaoArterial"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Pressão Arterial</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="120/80" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="frequenciaCardiaca"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Freq. Cardíaca (bpm)</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        {...field}
-                        onChange={(e) =>
-                          field.onChange(parseInt(e.target.value))
-                        }
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
-
-          {/* Botões de ação */}
-          <div className="col-span-2 flex justify-end gap-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => router.push(`/pacientes/${pacienteId}/avaliacoes`)}
-            >
-              Cancelar
-            </Button>
-            <Button type="submit">Salvar Avaliação</Button>
-          </div>
-        </div>
-      </form>
-    </Form>
+        </form>
+      </Form>
+    </ScrollArea>
   )
 }
