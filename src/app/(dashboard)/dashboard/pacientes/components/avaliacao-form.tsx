@@ -3,8 +3,9 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
-import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
+import axios from 'axios'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -18,6 +19,8 @@ import {
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { api } from '@/lib/axios'
+import { useToast } from '@/hooks/use-toast'
 
 const formSchema = z.object({
   dataAvaliacao: z.string(),
@@ -26,7 +29,6 @@ const formSchema = z.object({
   pressaoArterial: z.string(),
   frequenciaCardiaca: z.number().min(0),
   diagnosticoFisioterapeutico: z.string(),
-
   semiologia: z.string(),
   testesEspecificos: z.string(),
   escalaEva: z.number().min(0).max(10),
@@ -43,6 +45,8 @@ interface AvaliacaoFormProps {
 
 export function AvaliacaoForm({ pacienteId }: AvaliacaoFormProps) {
   const router = useRouter()
+  const { data: session } = useSession()
+  const { toast } = useToast()
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -55,11 +59,40 @@ export function AvaliacaoForm({ pacienteId }: AvaliacaoFormProps) {
     try {
       // Aqui virá a integração com a API
       console.log({ pacienteId, ...data })
-      toast.success('Avaliação cadastrada com sucesso!')
+
+      if (session) {
+        const dataToSend = {
+          pacienteId,
+          ...data,
+        }
+        const response = await api.post(
+          '/doctorexe/avaliacao-fisio',
+          dataToSend,
+          {
+            headers: {
+              Authorization: `Bearer ${session.user.apiToken}`,
+            },
+          },
+        )
+        console.log(response.data)
+      }
+
+      toast({
+        title: 'Sucesso',
+        description: 'Avaliação cadastrada com sucesso!',
+      })
+
       // router.push(`/pacientes/${pacienteId}/avaliacoes`)
     } catch (error) {
-      console.error(error)
-      toast.error('Erro ao cadastrar avaliação')
+      const errorMessage = axios.isAxiosError(error)
+        ? error.response?.data?.message || 'Erro Api Avaliação'
+        : 'Erro Api Avaliação'
+
+      toast({
+        title: 'Erro',
+        variant: 'destructive',
+        description: errorMessage,
+      })
     }
   }
 
@@ -67,7 +100,7 @@ export function AvaliacaoForm({ pacienteId }: AvaliacaoFormProps) {
     <ScrollArea className="h-[calc(100vh-170px)]  w-full pr-4">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
             {/* Dados Básicos */}
             <div className="col-span-2">
               <h3 className="text-lg font-medium mb-4">Dados da Avaliação</h3>
@@ -91,7 +124,7 @@ export function AvaliacaoForm({ pacienteId }: AvaliacaoFormProps) {
             {/* Sinais Vitais */}
             <div className="col-span-2">
               <h3 className="text-lg font-medium mb-4">Sinais Vitais</h3>
-              <div className="grid gap-4 md:grid-cols-4">
+              <div className="grid gap-4 grid-cols-1 md:grid-cols-4">
                 <FormField
                   control={form.control}
                   name="altura"
@@ -173,7 +206,7 @@ export function AvaliacaoForm({ pacienteId }: AvaliacaoFormProps) {
             {/* Avaliação Clínica */}
             <div className="col-span-2">
               <h3 className="text-lg font-medium mb-4">Avaliação Clínica</h3>
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
                 <FormField
                   control={form.control}
                   name="diagnosticoFisioterapeutico"
@@ -215,25 +248,26 @@ export function AvaliacaoForm({ pacienteId }: AvaliacaoFormProps) {
                     </FormItem>
                   )}
                 />
+              </div>
 
-                <div className="col-span-2">
-                  <h3 className="text-lg font-medium mb-4">
-                    Escala de Dor (EVA)
-                  </h3>
-                  <FormField
-                    control={form.control}
-                    name="escalaEva"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Intensidade da Dor</FormLabel>
-                        <FormControl>
-                          <div className="flex gap-1">
-                            {[...Array(11)].map((_, index) => (
-                              <Button
-                                key={index}
-                                type="button"
-                                className={`
-                  w-12 h-12 font-bold transition-all
+              <div className="col-span-2 mb-2">
+                <h3 className="text-lg font-medium mb-4">
+                  Escala de Dor (EVA)
+                </h3>
+                <FormField
+                  control={form.control}
+                  name="escalaEva"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Intensidade da Dor</FormLabel>
+                      <FormControl>
+                        <div className="flex gap-1">
+                          {[...Array(11)].map((_, index) => (
+                            <Button
+                              key={index}
+                              type="button"
+                              className={`
+                  w-8 md:w-12 h-12 font-bold transition-all
                   ${field.value === index ? 'ring-2 ring-offset-2 ring-primary scale-110' : 'hover:scale-105'}
                   ${
                     index === 0
@@ -246,30 +280,25 @@ export function AvaliacaoForm({ pacienteId }: AvaliacaoFormProps) {
                   }
                   ${field.value === index ? 'opacity-100' : 'opacity-70'}
                 `}
-                                onClick={() => field.onChange(index)}
-                              >
-                                {index}
-                              </Button>
-                            ))}
-                          </div>
-                        </FormControl>
-                        <div className="mt-4 flex justify-between text-sm text-muted-foreground">
-                          <span className="text-green-500">Sem dor (0)</span>
-                          <span className="text-yellow-500">
-                            Dor leve (1-3)
-                          </span>
-                          <span className="text-orange-500">
-                            Dor moderada (4-7)
-                          </span>
-                          <span className="text-red-500">
-                            Dor intensa (8-10)
-                          </span>
+                              onClick={() => field.onChange(index)}
+                            >
+                              {index}
+                            </Button>
+                          ))}
                         </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                      </FormControl>
+                      <div className="mt-4 flex gap-2 justify-start text-sm text-muted-foreground">
+                        <span className="text-green-500">Sem dor (0)</span>
+                        <span className="text-yellow-500">Dor leve (1-3)</span>
+                        <span className="text-orange-500">
+                          Dor moderada (4-7)
+                        </span>
+                        <span className="text-red-500">Dor intensa (8-10)</span>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
             </div>
 
