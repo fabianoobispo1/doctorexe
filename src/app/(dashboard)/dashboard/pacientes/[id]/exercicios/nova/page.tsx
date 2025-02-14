@@ -16,9 +16,9 @@ export const metadata: Metadata = {
 export default async function NovaAvaliacaoPage({
   params,
 }: {
-  params: Promise<{ id: string }>
+  params: { id: string }
 }) {
-  const id = (await params).id
+  const { id } = params
   return (
     <div className="flex flex-col gap-4 p-6">
       <div className="flex items-center gap-4">

@@ -1,80 +1,43 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { useSession } from 'next-auth/react'
+import { useMutation, useQuery } from 'convex/react'
 
+import { api } from '@/convex/_generated/api'
+import { Id } from '@/convex/_generated/dataModel'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Spinner } from '@/components/ui/spinner'
-import { api } from '@/lib/axios'
 import { extractYouTubeID } from '@/lib/utils'
-
-interface Exercise {
-  id: string
-  nome: string
-  descricao: string
-  url_video: string
-}
 
 interface ExerciciosListProps {
   pascienteId: string
 }
-/* /doctorexe/exercicios/all */
+
 export const ExerciciosList = ({ pascienteId }: ExerciciosListProps) => {
-  const { data: session } = useSession()
   const [loading, setLoading] = useState(true)
-  const [selectedExercises, setSelectedExercises] = useState<string[]>([])
-  const [exercises, setExercises] = useState<Exercise[]>([])
-  const [initialExercises, setInitialExercises] = useState<string[]>([])
+  const [selectedExercises, setSelectedExercises] = useState<Id<'exercise'>[]>(
+    [],
+  )
+  const [initialExercises, setInitialExercises] = useState<Id<'exercise'>[]>([])
+
+  const exercises = useQuery(api.exercicio.getAll)
+  const patientExercises = useQuery(api.exercicio.getByPatientId, {
+    pascienteId: pascienteId as Id<'paciente'>,
+  })
+
+  const addExerciseToPatient = useMutation(api.exercicio.addToPatient)
+  const removeExerciseFromPatient = useMutation(api.exercicio.removeFromPatient)
 
   useEffect(() => {
-    const loadExercicios = async () => {
-      try {
-        if (session) {
-          const response = await api.get('/doctorexe/exercicios/all', {
-            headers: {
-              Authorization: `Bearer ${session.user.apiToken}`,
-            },
-          })
-
-          setExercises(response.data.exercicios)
-          loadExerciciosPaciente()
-        }
-      } catch (error) {
-        console.error('Erro ao carregar exercícios:', error)
-      } finally {
-        setLoading(false)
-      }
+    if (patientExercises) {
+      const existingExerciseIds = patientExercises.map((ex) => ex.exercise_id)
+      setInitialExercises(existingExerciseIds)
+      setSelectedExercises(existingExerciseIds)
+      setLoading(false)
     }
+  }, [patientExercises])
 
-    const loadExerciciosPaciente = async () => {
-      try {
-        if (session) {
-          const response = await api.get(
-            `doctorexe/paciente/${pascienteId}/exercicios`,
-            {
-              headers: {
-                Authorization: `Bearer ${session.user.apiToken}`,
-              },
-            },
-          )
-          const existingExerciseIds = response.data.exercises.map(
-            (ex: Exercise) => ex.id,
-          )
-
-          setInitialExercises(existingExerciseIds)
-          setSelectedExercises(existingExerciseIds)
-        }
-      } catch (error) {
-        console.error('Erro ao carregar exercícios:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    loadExercicios()
-  }, [session, pascienteId])
-
-  const handleCheckboxChange = (exerciseId: string) => {
+  const handleCheckboxChange = (exerciseId: Id<'exercise'>) => {
     setSelectedExercises((prev) =>
       prev.includes(exerciseId)
         ? prev.filter((id) => id !== exerciseId)
@@ -84,52 +47,34 @@ export const ExerciciosList = ({ pascienteId }: ExerciciosListProps) => {
 
   const handleSave = async () => {
     setLoading(true)
-
     try {
-      // Exercises to add (selected but not in initial)
       const exercisesToAdd = selectedExercises.filter(
         (id) => !initialExercises.includes(id),
       )
 
-      // Exercises to remove (in initial but not selected)
       const exercisesToRemove = initialExercises.filter(
         (id) => !selectedExercises.includes(id),
       )
-      // Add new exercises
-      for (const exerciseId of exercisesToAdd) {
-        if (session) {
-          await api.post(
-            '/doctorexe/paciente/exercicio',
-            {
-              patient_id: pascienteId,
-              exercise_id: exerciseId,
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${session?.user.apiToken}`,
-              },
-            },
-          )
-        }
-      }
 
-      // Remove unselected exercises
-      for (const exerciseId of exercisesToRemove) {
-        await api.delete('/doctorexe/paciente/exercicio/remove', {
-          data: {
-            patient_id: pascienteId,
-            exercise_id: exerciseId,
-          },
-          headers: {
-            Authorization: `Bearer ${session?.user.apiToken}`,
-          },
+      for (const exerciseId of exercisesToAdd) {
+        await addExerciseToPatient({
+          patientId: pascienteId as Id<'paciente'>,
+          exerciseId,
+          created_at: Date.now(),
+          updated_at: Date.now(),
         })
       }
 
-      // Clear selection after successful save
+      for (const exerciseId of exercisesToRemove) {
+        await removeExerciseFromPatient({
+          patientId: pascienteId as Id<'paciente'>,
+          exerciseId,
+        })
+      }
+
       setInitialExercises([...selectedExercises])
     } catch (error) {
-      console.error('Error saving exercises:', error)
+      console.error('Erro ao salvar exercícios:', error)
     } finally {
       setLoading(false)
     }
@@ -139,14 +84,14 @@ export const ExerciciosList = ({ pascienteId }: ExerciciosListProps) => {
     <div className="space-y-4">
       <div className="grid gap-4">
         {loading ? <Spinner /> : null}
-        {exercises.map((exercise) => (
+        {exercises?.map((exercise) => (
           <div
-            key={exercise.id}
+            key={exercise._id}
             className="flex items-center space-x-2 border p-4 rounded-md"
           >
             <Checkbox
-              checked={selectedExercises.includes(exercise.id)}
-              onCheckedChange={() => handleCheckboxChange(exercise.id)}
+              checked={selectedExercises.includes(exercise._id)}
+              onCheckedChange={() => handleCheckboxChange(exercise._id)}
             />
             <div>
               <h3 className="font-medium">{exercise.nome}</h3>

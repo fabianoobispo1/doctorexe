@@ -7,7 +7,6 @@ declare module 'next-auth' {
     role: string
     image: string
     email: string
-    apiToken: string
   }
   interface Session {
     user: {
@@ -16,7 +15,6 @@ declare module 'next-auth' {
       nome: string
       image: string
       email: string
-      apiToken: string
     } & DefaultSession['user']
   }
 }
@@ -28,6 +26,5 @@ declare module '@auth/core/jwt' {
     nome: string
     image: string
     email: string
-    apiToken: string
   }
 }

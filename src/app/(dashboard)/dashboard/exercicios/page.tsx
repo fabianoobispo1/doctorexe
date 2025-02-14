@@ -1,53 +1,55 @@
 'use client'
 import { Plus } from 'lucide-react'
 import Link from 'next/link'
-import { useCallback, useEffect, useState } from 'react'
-import { useSession } from 'next-auth/react'
+import { useState } from 'react'
+import { useQuery } from 'convex/react'
 
 import { Button } from '@/components/ui/button'
 import { DataTable } from '@/components/ui/data-table'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import BreadCrumb from '@/components/breadcrumb'
 import { Heading } from '@/components/ui/heading'
-import { api } from '@/lib/axios'
+import { api } from '@/convex/_generated/api'
+import { Spinner } from '@/components/ui/spinner'
+import type { ExercicioProps } from '@/types'
 
 import { columns } from './components/columns'
 
-interface PaginationMeta {
-  page: number
-  perPage: number
-  total: number
-}
-
 const breadcrumbItems = [{ title: 'Exercicios', link: '/dashboard/exercicios' }]
 export default function ExerciciosPage() {
-  const { data: session } = useSession()
-  const [exercicios, setExercicios] = useState([])
-  const [meta, setMeta] = useState<PaginationMeta>({
-    page: 1,
-    perPage: 20,
-    total: 0,
+  const [currentPage, setCurrentPage] = useState(1)
+  const perPage = 20
+  const offset = (currentPage - 1) * perPage
+
+  const rawExercicios = useQuery(api.exercicio.getAllPaginated, {
+    offset,
+    limit: perPage,
   })
 
-  const loadExercicios = useCallback(
-    async (page: number = 1) => {
-      if (session) {
-        const response = await api.get(`/doctorexe/exercicios?page=${page}`, {
-          headers: {
-            Authorization: `Bearer ${session.user.apiToken}`,
-          },
-        })
-        console.log(response)
-        setExercicios(response.data.exercicios)
-        setMeta(response.data.meta)
-      }
-    },
-    [session],
-  )
+  const total = useQuery(api.exercicio.getCount, {})
 
-  useEffect(() => {
-    loadExercicios(1)
-  }, [loadExercicios])
+  // Transform Convex data to match Paciente interface
+  const exercicio =
+    rawExercicios?.map((p) => ({
+      id: p._id,
+      nome: p.nome,
+      descricao: p.descricao,
+      url_img: p.url_img,
+      url_video: p.url_video,
+      created_at: Date.now(),
+    })) || []
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+  }
+
+  if (exercicio === undefined || total === undefined) {
+    return (
+      <div className="flex items-center justify-center">
+        <Spinner />
+      </div>
+    )
+  }
 
   return (
     <ScrollArea className="h-full w-full">
@@ -65,15 +67,15 @@ export default function ExerciciosPage() {
             </Button>
           </Link>
         </div>
-        <DataTable
+        <DataTable<ExercicioProps, unknown>
           searchKey="nome"
           columns={columns}
-          data={exercicios}
+          data={exercicio}
           pagination={{
-            pageSize: meta.perPage,
-            pageCount: Math.ceil(meta.total / meta.perPage),
-            currentPage: meta.page,
-            onPageChange: loadExercicios,
+            pageSize: perPage,
+            pageCount: Math.ceil((total || 0) / perPage),
+            currentPage,
+            onPageChange: handlePageChange,
           }}
         />
       </div>

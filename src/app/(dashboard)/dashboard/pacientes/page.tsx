@@ -1,56 +1,64 @@
 'use client'
 import { Plus } from 'lucide-react'
 import Link from 'next/link'
-import { useCallback, useEffect, useState } from 'react'
-import { useSession } from 'next-auth/react'
+import { useState } from 'react'
+import { useQuery } from 'convex/react'
 
 import { Button } from '@/components/ui/button'
 import { DataTable } from '@/components/ui/data-table'
 import BreadCrumb from '@/components/breadcrumb'
 import { Heading } from '@/components/ui/heading'
-import { api } from '@/lib/axios'
 import { Spinner } from '@/components/ui/spinner'
+import { api } from '@/convex/_generated/api'
 
 import { columns } from './components/columns'
 
-interface PaginationMeta {
-  page: number
-  perPage: number
-  total: number
-}
-
 const breadcrumbItems = [{ title: 'Pacientes', link: '/dashboard/pacientes' }]
 export default function PacientesPage() {
-  const { data: session } = useSession()
-  const [loading, setLoading] = useState(true)
-  const [pacientes, setPacientes] = useState([])
-  const [meta, setMeta] = useState<PaginationMeta>({
-    page: 1,
-    perPage: 20,
-    total: 0,
+  const [currentPage, setCurrentPage] = useState(1)
+  const perPage = 20
+  const offset = (currentPage - 1) * perPage
+
+  const rawPacientes = useQuery(api.paciente.getAllPaginated, {
+    offset,
+    limit: perPage,
   })
 
-  const loadPacientes = useCallback(
-    async (page: number = 1) => {
-      if (session) {
-        setLoading(true)
-        const response = await api.get(`/doctorexe/pacientes?page=${page}`, {
-          headers: {
-            Authorization: `Bearer ${session.user.apiToken}`,
-          },
-        })
-        console.log(response)
-        setPacientes(response.data.pacientes)
-        setMeta(response.data.meta)
-        setLoading(false)
-      }
-    },
-    [session],
-  )
+  const total = useQuery(api.paciente.getCount)
+  // Transform Convex data to match Paciente interface
+  const pacientes =
+    rawPacientes?.map((p) => ({
+      id: p._id,
+      nome: p.nome,
+      dataNascimento: new Date(p.dataNascimento).toISOString(),
+      telefone: p.telefone,
+      email: p.email,
+      sexo: p.sexo,
+      cidade: p.cidade,
+      bairro: p.bairro,
+      empresa: p.empresa,
+      endereco: p.enderecoResidencial,
+      enderecoResidencial: p.enderecoResidencial,
+      enderecoComercial: p.enderecoComercial,
+      naturalidade: p.naturalidade,
+      estadoCivil: p.estadoCivil,
+      created_at: new Date(p.created_at).toISOString(),
+      avaliacoes: p.avaliacoes,
+      historicoMedico: p.historicoMedico,
+      exercicios: p.exercicios,
+    })) || []
 
-  useEffect(() => {
-    loadPacientes(1)
-  }, [loadPacientes])
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+  }
+
+  if (pacientes === undefined || total === undefined) {
+    return (
+      <div className="flex items-center justify-center">
+        <Spinner />
+      </div>
+    )
+  }
 
   return (
     <div className="flex-1 space-y-4 p-4 pt-6 ">
@@ -64,23 +72,18 @@ export default function PacientesPage() {
           </Button>
         </Link>
       </div>
-      {loading ? (
-        <div className="flex items-center justify-center">
-          <Spinner />
-        </div>
-      ) : (
-        <DataTable
-          searchKey="nome"
-          columns={columns}
-          data={pacientes}
-          pagination={{
-            pageSize: meta.perPage,
-            pageCount: Math.ceil(meta.total / meta.perPage),
-            currentPage: meta.page,
-            onPageChange: loadPacientes,
-          }}
-        />
-      )}
+
+      <DataTable
+        searchKey="nome"
+        columns={columns}
+        data={pacientes}
+        pagination={{
+          pageSize: perPage,
+          pageCount: Math.ceil((total || 0) / perPage),
+          currentPage,
+          onPageChange: handlePageChange,
+        }}
+      />
     </div>
   )
 }

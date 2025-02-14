@@ -12,8 +12,6 @@ import FaleConoscoForm from '@/components/forms/fale-conosco-form'
 export const metadata: Metadata = {
   title: 'DoctorExe',
   description: 'Página inicial do DoctorExe',
-  /*   keywords:
-    '', */
 }
 
 export default function HomePage() {

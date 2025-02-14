@@ -4,11 +4,11 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
 import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
-import { AxiosError } from 'axios'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
+import { useMutation } from 'convex/react'
+import { fetchQuery } from 'convex/nextjs'
 
 import {
   Select,
@@ -28,8 +28,9 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
-import { api } from '@/lib/axios'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { api } from '@/convex/_generated/api'
+import { Id } from '@/convex/_generated/dataModel'
 
 interface PacienteFormProps {
   pacienteId?: string
@@ -55,7 +56,8 @@ export function PacienteForm({ pacienteId }: PacienteFormProps) {
   const router = useRouter()
   const [loading, setLoading] = useState<boolean>(false)
   const { toast } = useToast()
-  const { data: session } = useSession()
+
+  const createPaciente = useMutation(api.paciente.create)
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -78,20 +80,32 @@ export function PacienteForm({ pacienteId }: PacienteFormProps) {
   // Carregar dados do paciente quando houver um ID
   useEffect(() => {
     async function loadPaciente() {
-      if (pacienteId && session) {
+      if (pacienteId) {
         try {
-          const response = await api.get(`/doctorexe/pacientes/${pacienteId}`, {
-            headers: {
-              Authorization: `Bearer ${session.user.apiToken}`,
-            },
+          const response = await fetchQuery(api.paciente.getByID, {
+            pacienteId: pacienteId as Id<'paciente'>,
           })
 
-          const data = {
-            ...response.data,
-            dataNascimento: response.data.paciente.dataNascimento.split('T')[0],
-          }
+          if (response) {
+            const formattedData = {
+              nome: response.nome,
+              dataNascimento: new Date(response.dataNascimento)
+                .toISOString()
+                .split('T')[0],
+              telefone: response.telefone,
+              email: response.email,
+              sexo: response.sexo,
+              cidade: response.cidade,
+              bairro: response.bairro,
+              empresa: response.empresa,
+              enderecoResidencial: response.enderecoResidencial,
+              enderecoComercial: response.enderecoComercial,
+              naturalidade: response.naturalidade,
+              estadoCivil: response.estadoCivil,
+            }
 
-          form.reset(data)
+            form.reset(formattedData)
+          }
         } catch (error) {
           console.log(error)
           toast({
@@ -104,78 +118,62 @@ export function PacienteForm({ pacienteId }: PacienteFormProps) {
     }
 
     loadPaciente()
-  }, [pacienteId, session, form, toast])
+  }, [pacienteId, form, toast])
 
   async function onSubmit(data: FormValues) {
     // Aqui virá a integração com a API
     setLoading(true)
 
-    if (session) {
-      try {
-        if (pacienteId) {
-          // Edição - PUT
-          console.log('Editando paciente:', data)
-          /*  await api.put(`/doctorexe/pacientes/${paciente.id}`, data, {
+    try {
+      if (pacienteId) {
+        // Edição - PUT
+        console.log('Editando paciente:', data)
+        /*  await api.put(`/doctorexe/pacientes/${paciente.id}`, data, {
             headers: {
               Authorization: `Bearer ${session.user.apiToken}`,
             },
           }) */
-          toast({
-            title: 'Sucesso',
-            description: 'Paciente atualizado com sucesso.',
-          })
-        } else {
-          // add
-          const dataToSend = {
-            nome: data.nome,
-            dataNascimento: data.dataNascimento,
-            telefone: data.telefone,
-            email: data.email,
-            sexo: data.sexo,
-            cidade: data.cidade,
-            bairro: data.bairro,
-            empresa: data.empresa,
-            enderecoResidencial: data.enderecoResidencial,
-            enderecoComercial: data.enderecoComercial,
-            naturalidade: data.naturalidade,
-            estadoCivil: data.estadoCivil,
-          }
+        toast({
+          title: 'Sucesso',
+          description: 'Paciente atualizado com sucesso.',
+        })
+      } else {
+        // add
+        const dataToSend = {
+          nome: data.nome,
+          dataNascimento: new Date(data.dataNascimento).getTime(),
+          telefone: data.telefone,
+          email: data.email,
+          sexo: data.sexo,
+          cidade: data.cidade,
+          bairro: data.bairro,
+          empresa: data.empresa,
+          enderecoResidencial: data.enderecoResidencial,
+          enderecoComercial: data.enderecoComercial || '', // Fornece valor padrão vazio
+          naturalidade: data.naturalidade,
+          estadoCivil: data.estadoCivil,
+          created_at: Date.now(),
+          historicoMedico: undefined,
+          avaliacoes: [],
+          exercicios: [],
+        }
+        await createPaciente(dataToSend)
 
-          if (session) {
-            const response = await api.post(
-              '/doctorexe/pacientes',
-              dataToSend,
-              {
-                headers: {
-                  Authorization: `Bearer ${session.user.apiToken}`,
-                },
-              },
-            )
-            console.log(response)
-          }
-          toast({
-            title: 'ok',
-            description: 'Cadastro realizado.',
-          })
-        }
-      } catch (error: unknown) {
-        if (error instanceof AxiosError) {
-          toast({
-            title: 'Erro',
-            variant: 'destructive',
-            description: error.response?.data?.message,
-          })
-        } else {
-          toast({
-            title: 'Erro',
-            variant: 'destructive',
-            description: 'Erro Interno',
-          })
-        }
+        toast({
+          title: 'ok',
+          description: 'Cadastro realizado.',
+        })
       }
-
-      setLoading(false)
+    } catch (error) {
+      console.log(error)
+      toast({
+        title: 'Erro',
+        variant: 'destructive',
+        description: 'Erro Interno',
+      })
     }
+
+    setLoading(false)
 
     router.push('/dashboard/pacientes')
   }

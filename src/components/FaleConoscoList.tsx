@@ -1,8 +1,7 @@
 'use client'
-import { useCallback, useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Trash } from 'lucide-react'
-import { useSession } from 'next-auth/react'
-import { AxiosError } from 'axios'
+import { useMutation, useQuery } from 'convex/react'
 
 import {
   Table,
@@ -12,142 +11,62 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Checkbox } from '@/components/ui/checkbox'
-import { api } from '@/lib/axios'
 import { useToast } from '@/hooks/use-toast'
+import { api } from '@/convex/_generated/api'
+import type { Id } from '@/convex/_generated/dataModel'
 
 import { LoadingButton } from './ui/loading-button'
 import { ScrollArea, ScrollBar } from './ui/scroll-area'
 import { Spinner } from './ui/spinner'
+import { Checkbox } from './ui/checkbox'
 
-interface FaleConoscoListProps {
-  id: string
-  email: string
-  nome: string
-  telefone: string
-  mensagem: string
-  isCompleted: boolean
-  created_at: number
-  updated_at: number
-}
 export function FaleConoscoList() {
-  const [faleConosco, setFaleConosco] = useState<FaleConoscoListProps[]>([])
-
   const [loadingTodo, setLoadingTodo] = useState<boolean>(false)
 
   const { toast } = useToast()
 
-  const { data: session } = useSession()
+  // Usar useQuery do Convex para buscar dados
+  const faleConosco = useQuery(api.faleConosco.getAll)
 
-  const loadTodos = useCallback(async () => {
-    if (session) {
-      try {
-        if (session) {
-          const response = await api.get('/doctorexelistarfaleconosco', {
-            headers: {
-              Authorization: `Bearer ${session.user.apiToken}`,
-            },
-          })
-          setFaleConosco(response.data.faleConoscoDoctorexe)
-        }
-      } catch (error: unknown) {
-        console.log(error)
-        if (error instanceof AxiosError) {
-          toast({
-            title: 'Erro',
-            variant: 'destructive',
-            description: error.response?.data?.message,
-          })
-        } else {
-          toast({
-            title: 'Erro',
-            variant: 'destructive',
-            description: 'Erro Interno',
-          })
-        }
-      }
-    }
-  }, [session, toast])
+  // Mutations do Convex
+  const toggleFaleConosco = useMutation(api.faleConosco.toggle)
+  const removeFaleConosco = useMutation(api.faleConosco.remove)
 
-  useEffect(() => {
-    if (session) {
-      loadTodos()
-    }
-  }, [loadTodos, session])
-
-  const toggleTodo = async (id: string) => {
+  const handleToggle = async (id: Id<'faleConosco'>) => {
     setLoadingTodo(true)
-
-    if (session) {
-      try {
-        if (session) {
-          await api.get(`/doctorexechecktodo/${id}`, {
-            headers: {
-              Authorization: `Bearer ${session.user.apiToken}`,
-            },
-          })
-        }
-        /*        toast({
-          title: 'ok',
-          description: 'Alterado com sucesso.',
-        }) */
-      } catch (error: unknown) {
-        console.log(error)
-        if (error instanceof AxiosError) {
-          toast({
-            title: 'Erro',
-            variant: 'destructive',
-            description: error.response?.data?.message,
-          })
-        } else {
-          toast({
-            title: 'Erro',
-            variant: 'destructive',
-            description: 'Erro Interno',
-          })
-        }
-      }
+    try {
+      await toggleFaleConosco({ id })
+      toast({
+        title: 'Sucesso',
+        description: 'Status alterado com sucesso',
+      })
+    } catch (error) {
+      console.log(error)
+      toast({
+        title: 'Erro',
+        variant: 'destructive',
+        description: 'Erro ao alterar status',
+      })
     }
-
-    loadTodos()
     setLoadingTodo(false)
   }
 
-  const removeTodo = async (id: string) => {
+  const handleRemove = async (id: Id<'faleConosco'>) => {
     setLoadingTodo(true)
-
-    if (session) {
-      try {
-        if (session) {
-          await api.delete(`/doctorexeremoverfaleconosco/${id}`, {
-            headers: {
-              Authorization: `Bearer ${session.user.apiToken}`,
-            },
-          })
-        }
-        toast({
-          title: 'ok',
-          description: 'Removido com sucesso.',
-        })
-      } catch (error: unknown) {
-        console.log(error)
-        if (error instanceof AxiosError) {
-          toast({
-            title: 'Erro',
-            variant: 'destructive',
-            description: error.response?.data?.message,
-          })
-        } else {
-          toast({
-            title: 'Erro',
-            variant: 'destructive',
-            description: 'Erro Interno',
-          })
-        }
-      }
+    try {
+      await removeFaleConosco({ id })
+      toast({
+        title: 'Sucesso',
+        description: 'Mensagem removida com sucesso',
+      })
+    } catch (error) {
+      console.log(error)
+      toast({
+        title: 'Erro',
+        variant: 'destructive',
+        description: 'Erro ao remover mensagem',
+      })
     }
-
-    loadTodos()
     setLoadingTodo(false)
   }
 
@@ -161,41 +80,34 @@ export function FaleConoscoList() {
               <TableHead className="text-center">Email</TableHead>
               <TableHead className="text-center">Telefone</TableHead>
               <TableHead className="text-center">Mensagem</TableHead>
-              {/*    <TableHead className="text-center">Feito</TableHead> */}
+              <TableHead className="text-center">Status</TableHead>
               <TableHead className="text-center">Criado em</TableHead>
-              <TableHead className="text-center">Opções</TableHead>
+              <TableHead className="text-center">Ações</TableHead>
             </TableRow>
           </TableHeader>
 
           <TableBody>
             {faleConosco ? (
-              faleConosco.map((faleConosco) => (
-                <TableRow key={faleConosco.id}>
-                  <TableCell>{faleConosco.nome}</TableCell>
-                  <TableCell>{faleConosco.email}</TableCell>
-                  <TableCell>{faleConosco.telefone}</TableCell>
-                  <TableCell>{faleConosco.mensagem}</TableCell>
+              faleConosco.map((item) => (
+                <TableRow key={item._id}>
+                  <TableCell>{item.nome}</TableCell>
+                  <TableCell>{item.email}</TableCell>
+                  <TableCell>{item.telefone}</TableCell>
+                  <TableCell>{item.mensagem}</TableCell>
                   <TableCell className="text-center">
                     <Checkbox
-                      checked={faleConosco.isCompleted}
-                      onCheckedChange={() => toggleTodo(faleConosco.id)}
+                      checked={item.isCompleted}
+                      onCheckedChange={() => handleToggle(item._id)}
                     />
                   </TableCell>
-                  {/*         <TableCell className="text-center">
-                    {new Date(faleConosco.created_at).toLocaleDateString()}
-                  </TableCell> */}
+                  <TableCell className="text-center">
+                    {new Date(item.created_at).toLocaleDateString()}
+                  </TableCell>
                   <TableCell className="flex items-center justify-center gap-2">
-                    {/*  <LoadingButton
-                      className="w-32"
-                      loading={loadingTodo}
-                      onClick={() => toggleTodo(faleConosco.id)}
-                    >
-                      {faleConosco.isCompleted ? 'Desfazer' : 'Completo'}
-                    </LoadingButton> */}
                     <LoadingButton
                       loading={loadingTodo}
                       variant={'destructive'}
-                      onClick={() => removeTodo(faleConosco.id)}
+                      onClick={() => handleRemove(item._id)}
                     >
                       <Trash className="h-4 w-4" />
                     </LoadingButton>
@@ -203,7 +115,11 @@ export function FaleConoscoList() {
                 </TableRow>
               ))
             ) : (
-              <Spinner />
+              <TableRow>
+                <TableCell colSpan={7} className="text-center">
+                  <Spinner />
+                </TableCell>
+              </TableRow>
             )}
           </TableBody>
         </Table>

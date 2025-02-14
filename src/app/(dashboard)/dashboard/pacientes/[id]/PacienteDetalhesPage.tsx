@@ -1,13 +1,13 @@
 'use client'
-import { useSession } from 'next-auth/react'
-import { useCallback, useEffect, useState } from 'react'
+
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { useMutation, useQuery } from 'convex/react'
 
+import { api } from '@/convex/_generated/api'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { api } from '@/lib/axios'
 import { Spinner } from '@/components/ui/spinner'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import {
@@ -21,60 +21,25 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
+import type { Id } from '@/convex/_generated/dataModel'
 
 interface PacienteDetalhesPageProps {
   idPaciente: string
-}
-export interface Paciente {
-  id: string
-  nome: string
-  dataNascimento: string
-  sexo: string
-  estadoCivil: string
-  naturalidade: string
-  empresa: string
-  telefone: string
-  enderecoResidencial: string
-  enderecoComercial: string
-  bairro: string
-  cidade: string
-  created_at: string
 }
 
 export default function PacienteDetalhesPage({
   idPaciente,
 }: PacienteDetalhesPageProps) {
-  const { data: session } = useSession()
   const router = useRouter()
-  const [paciente, setPaciente] = useState<Paciente | null>(null)
+  const deletePaciente = useMutation(api.paciente.remove)
 
-  const loadPaciente = useCallback(
-    async (id: string) => {
-      if (session) {
-        const response = await api.get(`/doctorexe/pacientes/${id}`, {
-          headers: {
-            Authorization: `Bearer ${session.user.apiToken}`,
-          },
-        })
-        setPaciente(response.data.paciente)
-      }
-    },
-    [session],
-  )
-
-  useEffect(() => {
-    loadPaciente(idPaciente)
-  }, [loadPaciente, idPaciente])
+  const paciente = useQuery(api.paciente.getByID, {
+    pacienteId: idPaciente as Id<'paciente'>,
+  })
 
   const handleDeletePaciente = async () => {
-    if (session) {
-      await api.delete(`/doctorexe/pacientes/${idPaciente}`, {
-        headers: {
-          Authorization: `Bearer ${session.user.apiToken}`,
-        },
-      })
-      router.push('/dashboard/pacientes')
-    }
+    await deletePaciente({ pacienteId: idPaciente as Id<'paciente'> })
+    router.push('/dashboard/pacientes')
   }
   return (
     <div className="flex flex-col gap-4 p-6">
@@ -162,13 +127,13 @@ export default function PacienteDetalhesPage({
                 <CardTitle>Ações</CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col gap-2">
-                <Link href={`/dashboard/pacientes/${paciente.id}/exercicios`}>
+                <Link href={`/dashboard/pacientes/${paciente._id}/exercicios`}>
                   <Button className="w-full">Exercícios</Button>
                 </Link>
-                <Link href={`/dashboard/pacientes/${paciente.id}/avaliacoes`}>
+                <Link href={`/dashboard/pacientes/${paciente._id}/avaliacoes`}>
                   <Button className="w-full">Nova Avaliação</Button>
                 </Link>
-                <Link href={`/dashboard/pacientes/${paciente.id}/historico`}>
+                <Link href={`/dashboard/pacientes/${paciente._id}/historico`}>
                   <Button variant="outline" className="w-full">
                     Ver Histórico
                   </Button>

@@ -1,5 +1,4 @@
 import ThemeToggle from '@/components/layout/ThemeToggle/theme-toggle'
-import { ProfileData } from '@/components/profile-data'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
 export default function page() {
@@ -12,7 +11,6 @@ export default function page() {
         <div className="flex items-center justify-start space-y-2">
           <h2 className="text-3xl font-bold tracking-tight">Bem Vindo 👋</h2>
         </div>
-        <ProfileData />
       </div>
     </ScrollArea>
   )
