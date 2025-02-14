@@ -104,6 +104,13 @@ export const patientExerciseSchema = {
   updated_at: v.number(),
 }
 
+export const evolucaoSchema = {
+  data: v.number(), // DateTime as timestamp
+  descricao: v.string(),
+  avaliacaoId: v.id('avaliacaoFisio'),
+  created_at: v.number(), // DateTime as timestamp
+}
+
 export const faleConoscoSchema = {
   email: v.string(),
   nome: v.string(),
@@ -135,4 +142,7 @@ export default defineSchema({
     .index('by_exercise', ['exercise_id'])
     .index('by_patient_exercise', ['patient_id', 'exercise_id']),
   faleConosco: defineTable(faleConoscoSchema).index('by_nome', ['nome']),
+  evolucao: defineTable(evolucaoSchema)
+    .index('by_avaliacao', ['avaliacaoId'])
+    .index('by_data', ['data']),
 })

@@ -6,8 +6,6 @@ import { Button } from '@/components/ui/button'
 
 import { ExerciciosList } from './exercicios-list'
 
-/* import { AvaliacaoForm } from '../../../components/avaliacao-form'
- */
 export const metadata: Metadata = {
   title: 'Exercícios| DoctorExe',
   description: 'Cadastro de exercícios',
@@ -16,9 +14,9 @@ export const metadata: Metadata = {
 export default async function NovaAvaliacaoPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
-  const { id } = params
+  const id = (await params).id
   return (
     <div className="flex flex-col gap-4 p-6">
       <div className="flex items-center gap-4">
