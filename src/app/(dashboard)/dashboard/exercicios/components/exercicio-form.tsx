@@ -4,9 +4,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
 import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
-import { AxiosError } from 'axios'
 import { useState } from 'react'
+import { useMutation } from 'convex/react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -19,9 +18,9 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
-import { api } from '@/lib/axios'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { extractYouTubeID } from '@/lib/utils'
+import { api } from '@/convex/_generated/api'
 
 const formSchema = z.object({
   nome: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres'),
@@ -36,8 +35,10 @@ export function ExercicioForm() {
   const router = useRouter()
   const [loading, setLoading] = useState<boolean>(false)
   const { toast } = useToast()
-  const { data: session } = useSession()
+
   const [videoId, setVideoId] = useState<string | null>(null)
+
+  const createExercicio = useMutation(api.exercicio.create)
 
   const handleVideoUrlChange = (url: string) => {
     const id = extractYouTubeID(url)
@@ -55,53 +56,31 @@ export function ExercicioForm() {
   })
 
   async function onSubmit(data: FormValues) {
-    console.log(data)
     setLoading(true)
 
-    if (session) {
-      const dataToSend = {
+    try {
+      await createExercicio({
         nome: data.nome,
         descricao: data.descricao,
         url_img: data.url_img,
         url_video: data.url_video,
-      }
+      })
 
-      try {
-        if (session) {
-          const response = await api.post(
-            '/doctorexe/exercicios/registrar',
-            dataToSend,
-            {
-              headers: {
-                Authorization: `Bearer ${session.user.apiToken}`,
-              },
-            },
-          )
-          console.log(response)
-        }
-        toast({
-          title: 'ok',
-          description: 'Cadastro realizado.',
-        })
-        form.reset()
-      } catch (error: unknown) {
-        if (error instanceof AxiosError) {
-          toast({
-            title: 'Erro',
-            variant: 'destructive',
-            description: error.response?.data?.message,
-          })
-        } else {
-          toast({
-            title: 'Erro',
-            variant: 'destructive',
-            description: 'Erro Interno',
-          })
-        }
-      }
-
-      setLoading(false)
+      toast({
+        title: 'ok',
+        description: 'Cadastro realizado.',
+      })
+      form.reset()
+    } catch (error) {
+      console.log(error)
+      toast({
+        title: 'Erro',
+        variant: 'destructive',
+        description: 'Erro Interno',
+      })
     }
+
+    setLoading(false)
 
     router.push('/dashboard/exercicios')
   }

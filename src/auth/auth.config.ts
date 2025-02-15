@@ -2,9 +2,20 @@ import { NextAuthConfig } from 'next-auth'
 import CredentialProvider from 'next-auth/providers/credentials'
 import GoogleProvider from 'next-auth/providers/google'
 import GithubProvider from 'next-auth/providers/github'
+import { fetchMutation, fetchQuery } from 'convex/nextjs'
 import { z } from 'zod'
+import { compare } from 'bcryptjs'
 
-import { api } from '@/lib/axios'
+import { api } from '../../convex/_generated/api'
+import type { Id } from '../../convex/_generated/dataModel'
+
+async function getUser(identifier: { key: string; value: string }) {
+  let user
+  if (identifier.key === 'email')
+    user = fetchQuery(api.user.getByEmail, { email: identifier.value })
+
+  return user
+}
 
 const authConfig = {
   providers: [
@@ -40,23 +51,33 @@ const authConfig = {
 
         const { email, password } = parsedCredentials.data
 
-        const response = await api.post('/doctorexe/autenticacao', {
-          email,
-          password,
+        const user = await getUser({
+          key: email ? 'email' : 'username',
+          value: email,
         })
-        console.log(response.data)
-        if (!response.data) {
+        if (!user) {
           throw new Error('Usuário não encontrado')
         }
-        console.log(response.data.token)
+        if (user.password === '') {
+          throw new Error('Entrar com provider')
+        }
 
+        const isMatch = await compare(password, user.password)
+        if (!isMatch) {
+          throw new Error('Senha incorreta')
+        }
+
+        // Atualiza o último login após autenticação bem sucedida
+        await fetchMutation(api.user.UpdateLastLogin, {
+          userId: user._id,
+          last_login: Date.now(),
+        })
         return {
-          id: response.data.id,
-          image: response.data.image || '',
-          email: response.data.email,
-          role: response.data.role,
-          nome: response.data.nome,
-          apiToken: response.data.token,
+          id: user._id.toString(),
+          image: user.image || '',
+          email: user.email,
+          role: user.role,
+          nome: user.nome,
         }
       },
     }),
@@ -65,12 +86,12 @@ const authConfig = {
     signIn: '/entrar',
   },
   callbacks: {
-    /*     async signIn({ account, profile, user }) {
+    async signIn({ account, profile, user }) {
       if (account?.provider === 'github' || account?.provider === 'google') {
-        console.log('account ✔')
-        console.log(account)
-        console.log('profile ✔')
-        console.log(profile)
+        // console.log('account ✔')
+        // console.log(account)
+        // console.log('profile ✔')
+        // console.log(profile)
         const provider = account?.provider
         const email = profile?.email
 
@@ -111,29 +132,32 @@ const authConfig = {
           }
         }
       }
+
       return true
-    }, */
+    },
     async jwt({ token, user }) {
+      // console.log('JWT Callback - Token antes:', token)
+      // console.log('JWT Callback - User:', user)
       if (user) {
         token.id = user.id as string
         token.role = user.role
         token.image = user.image as string
         token.nome = user.nome as string
-        token.email = user.email as string
-        token.apiToken = user.apiToken as string
       }
+      // console.log('JWT Callback - Token depois:', token)
       return token
     },
 
     async session({ session, token }) {
+      // console.log('Session Callback - Token:', token)
+      // console.log('Session Callback - Session antes:', session)
       if (token.role) {
         session.user.id = token.id
         session.user.role = token.role
         session.user.image = token.image
         session.user.nome = token.nome
-        session.user.email = token.email
-        session.user.apiToken = token.apiToken
       }
+      // console.log('Session Callback - Session depois:', session)
       return session
     },
   },

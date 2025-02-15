@@ -5,19 +5,11 @@ import { ArrowUpDown } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { extractYouTubeID } from '@/lib/utils'
+import type { ExercicioProps } from '@/types'
 
 import { ActionCell } from './actionColun'
 
-export type Paciente = {
-  id: string
-  nome: string
-  descricao: string
-  url_img: string
-  url_video: string
-  created_at: string
-}
-
-export const columns: ColumnDef<Paciente>[] = [
+export const columns: ColumnDef<ExercicioProps>[] = [
   {
     accessorKey: 'url_video',
     header: 'Vídeo',

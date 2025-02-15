@@ -1,51 +1,21 @@
 'use client'
 import Link from 'next/link'
 import { ArrowLeft, Plus } from 'lucide-react'
-import { useSession } from 'next-auth/react'
-import { useCallback, useEffect, useState } from 'react'
+import { useQuery } from 'convex/react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { api } from '@/lib/axios'
+import { api } from '@/convex/_generated/api'
+import type { Doc, Id } from '@/convex/_generated/dataModel'
 
 interface AvaliacoesPageProps {
   idPaciente: string
 }
-interface Avaliacao {
-  id: string
-  dataAvaliacao: string
-  diagnosticoFisioterapeutico: string
-  escalaEva: number
-  created_at: string
-  updated_at: string
-}
 
 export default function AvaliacoesPage({ idPaciente }: AvaliacoesPageProps) {
-  const { data: session } = useSession()
-  const [avaliacoes, setAvaliacoes] = useState<Avaliacao[] | null>(null)
-
-  const loadAvaliacoes = useCallback(
-    async (id: string) => {
-      if (session) {
-        const response = await api.get('/doctorexe/avaliacao-fisio', {
-          headers: {
-            Authorization: `Bearer ${session.user.apiToken}`,
-          },
-          params: {
-            pacienteId: id,
-            page: 1,
-            perPage: 20,
-          },
-        })
-        setAvaliacoes(response.data.avaliacoes)
-      }
-    },
-    [session],
-  )
-
-  useEffect(() => {
-    loadAvaliacoes(idPaciente)
-  }, [loadAvaliacoes, idPaciente])
+  const avaliacoes = useQuery(api.avaliacoes.getByID, {
+    pacienteId: idPaciente as Id<'paciente'>,
+  }) as Doc<'avaliacaoFisio'>[] | undefined
 
   return (
     <div className="flex flex-col gap-4 p-6">
@@ -68,10 +38,10 @@ export default function AvaliacoesPage({ idPaciente }: AvaliacoesPageProps) {
         </Link>
       </div>
 
-      {avaliacoes && avaliacoes.length > 0 ? (
+      {Array.isArray(avaliacoes) && avaliacoes.length > 0 ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {avaliacoes.map((avaliacao) => (
-            <Card key={avaliacao.id}>
+            <Card key={avaliacao._id}>
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <span>Avaliação Fisioterápica</span>
@@ -88,7 +58,7 @@ export default function AvaliacoesPage({ idPaciente }: AvaliacoesPageProps) {
                     EVA: {avaliacao.escalaEva}
                   </span>
                   <Link
-                    href={`/dashboard/pacientes/${idPaciente}/avaliacoes/${avaliacao.id}`}
+                    href={`/dashboard/pacientes/${idPaciente}/avaliacoes/${avaliacao._id}`}
                   >
                     <Button variant="outline" size="sm">
                       Ver detalhes

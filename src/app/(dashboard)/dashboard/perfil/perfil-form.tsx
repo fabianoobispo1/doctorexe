@@ -4,10 +4,10 @@ import { useCallback, useEffect, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { useSession } from 'next-auth/react'
-import { AxiosError } from 'axios'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { CalendarIcon } from 'lucide-react'
+import { fetchMutation, fetchQuery } from 'convex/nextjs'
 
 import { Calendar } from '@/components/ui/calendar'
 import {
@@ -29,7 +29,8 @@ import {
 import { useToast } from '@/hooks/use-toast'
 import { Spinner } from '@/components/ui/spinner'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { api } from '@/lib/axios'
+import { api } from '@/convex/_generated/api'
+import type { Id } from '@/convex/_generated/dataModel'
 
 import { ImageUpload } from './image-upload'
 
@@ -101,42 +102,36 @@ export const PerfilForm: React.FC = () => {
   const loadUser = useCallback(async () => {
     setLoadingData(true)
     if (session) {
+      console.log(session.user.id)
       try {
-        const response = await api.post('/doctorexe/perfil/id', {
-          id: session.user.id,
+        const response = await fetchQuery(api.user.getById, {
+          userId: session.user.id as Id<'user'>,
         })
-        console.log('carregou usuario')
-        console.log(response.data.doctorExeUsuario)
-
+        console.log(response)
         if (!response) {
           console.error('Erro ao buscar os dados do usuário:')
           return
         }
 
-        if (response.data.doctorExeUsuario.provider !== 'credentials') {
+        if (response.provider !== 'credentials') {
           setBloqueioProvider(true)
         }
 
         form.reset({
-          id: response.data.doctorExeUsuario.id,
-          nome: response.data.doctorExeUsuario.nome,
-          email: response.data.doctorExeUsuario.email,
-          data_nascimento: response.data.doctorExeUsuario.data_nascimento
-            ? new Date(response.data.doctorExeUsuario.data_nascimento)
+          id: response._id,
+          nome: response.nome,
+          email: response.email,
+          data_nascimento: response.data_nascimento
+            ? new Date(response.data_nascimento)
             : undefined,
-          cpf: response.data.doctorExeUsuario.cpf,
-          image: response.data.doctorExeUsuario.image
+
+          cpf: response.cpf,
+          image: response.image
             ? {
-                url: response.data.doctorExeUsuario.image,
-                key: response.data.doctorExeUsuario.image_key,
+                url: response.image,
+                key: response.image_key,
               }
             : null,
-
-          /*  
-        
-          oldPassword: '',
-          password: '',
-          confirmPassword: '', */
         })
       } catch (error) {
         console.error('Erro ao buscar os dados do usuário:', error)
@@ -201,39 +196,22 @@ export const PerfilForm: React.FC = () => {
     }
     console.log(dataToSend)
 
-    try {
-      if (session) {
-        const response = await api.patch(
-          '/doctorexe/perfil/update',
-          dataToSend,
-          {
-            headers: {
-              Authorization: `Bearer ${session.user.apiToken}`,
-            },
-          },
-        )
-        console.log(response)
-      }
-      toast({
-        title: 'ok',
-        description: 'Cadastro alterado.',
-      })
-      loadUser()
-    } catch (error: unknown) {
-      if (error instanceof AxiosError) {
-        toast({
-          title: 'Erro',
-          variant: 'destructive',
-          description: error.response?.data?.message,
-        })
-      } else {
-        toast({
-          title: 'Erro',
-          variant: 'destructive',
-          description: 'Erro Interno',
-        })
-      }
-    }
+    await fetchMutation(api.user.UpdateUser, {
+      userId: data.id as Id<'user'>,
+      email: data.email,
+      /*  image: data.image, */
+      nome: data.nome,
+      /*   data_nascimento: timestamp,
+      provider: data.provider,
+      image_key: imgKey,
+      password, */
+    })
+
+    toast({
+      title: 'ok',
+      description: 'Cadastro alterado.',
+    })
+    loadUser()
 
     setLoading(false)
   }

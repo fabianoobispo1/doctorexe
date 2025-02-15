@@ -3,7 +3,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
-import axios from 'axios'
+import { fetchMutation, fetchQuery } from 'convex/nextjs'
+import { hash } from 'bcryptjs'
 
 import { Input } from '@/components/ui/input'
 import {
@@ -15,7 +16,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { useToast } from '@/hooks/use-toast'
-import { api } from '@/lib/axios'
+import { api } from '@/convex/_generated/api'
 
 import { LoadingButton } from '../ui/loading-button'
 
@@ -54,35 +55,59 @@ export default function UserRegisterForm({ setButton }: UserRegisterFormProps) {
   const onSubmit = async (data: UserFormValue) => {
     setLoading(true)
 
+    const existingUserByEmail = await fetchQuery(api.user.getByEmail, {
+      email: data.email,
+    })
+
+    if (existingUserByEmail) {
+      toast({
+        title: 'Erro',
+        variant: 'destructive',
+        description: 'Email já cadastrado.',
+      })
+      setLoading(false)
+      return
+    }
     try {
-      await api.post('/doctorexe/register', {
-        nome: data.nome,
-        email: data.email,
-        password: data.password,
+      const hashedPassword = await hash(data.password, 6)
+      const user = await fetchMutation(api.user.create, {
+        password: hashedPassword,
         provider: 'credentials',
+        email: data.email,
         role: 'user',
         image: 'empty',
+        nome: data.nome,
       })
 
+      if (!user) {
+        toast({
+          title: 'Erro',
+          variant: 'destructive',
+          description: 'Usuario nao criado.',
+        })
+        setLoading(false)
+        return
+      }
+
       toast({
-        title: 'Sucesso',
+        title: 'OK',
         description: 'Usuário criado com sucesso. Por favor, faça login.',
       })
 
+      setLoading(false)
       setButton('Cadastrar')
     } catch (error) {
-      const errorMessage = axios.isAxiosError(error)
-        ? error.response?.data?.error || 'Erro ao criar usuário'
-        : 'Erro ao criar usuário'
+      console.error(error)
 
       toast({
         title: 'Erro',
         variant: 'destructive',
-        description: errorMessage,
+        description: 'Ocorreu um erro ao criar o usuário.',
       })
-    } finally {
       setLoading(false)
     }
+
+    setLoading(false)
   }
 
   return (

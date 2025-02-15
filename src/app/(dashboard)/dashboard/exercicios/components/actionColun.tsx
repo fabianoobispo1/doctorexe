@@ -1,5 +1,5 @@
 import { MoreHorizontal } from 'lucide-react'
-import { useSession } from 'next-auth/react'
+import { useMutation } from 'convex/react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -8,29 +8,16 @@ import {
   DropdownMenuTrigger,
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu'
-import { api } from '@/lib/axios'
-export type Paciente = {
-  id: string
-  nome: string
-  descricao: string
-  url_img: string
-  url_video: string
-  created_at: string
-}
+import type { ExercicioProps } from '@/types'
+import { api } from '@/convex/_generated/api'
+import type { Id } from '@/convex/_generated/dataModel'
 
-export function ActionCell({ exercicio }: { exercicio: Paciente }) {
-  const { data: session } = useSession()
+export function ActionCell({ exercicio }: { exercicio: ExercicioProps }) {
+  const deleteExercise = useMutation(api.exercicio.remove)
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: Id<'exercise'>) => {
     try {
-      if (session) {
-        await api.delete(`/doctorexe/exercicio/${id}`, {
-          headers: {
-            Authorization: `Bearer ${session.user.apiToken}`,
-          },
-        })
-        window.location.reload()
-      }
+      await deleteExercise({ exerciseId: id })
     } catch (error) {
       console.log(error)
     }

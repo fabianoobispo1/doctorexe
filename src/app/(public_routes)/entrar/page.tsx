@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 
 import AuthenticationModal from '@/components/signin/authentication-modal'
+import ConvexStatus from '@/components/convex-status'
 
 export const metadata: Metadata = {
   title: 'Principal',
@@ -29,6 +30,7 @@ export default function auth2() {
  */}
       {/*     <ResetPasswordEmail idReset="12" nome="fabiano" /> */}
       <AuthenticationModal />
+      <ConvexStatus />
     </div>
   )
 }

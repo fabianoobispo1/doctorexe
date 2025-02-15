@@ -6,8 +6,6 @@ import { Button } from '@/components/ui/button'
 
 import { ExerciciosList } from './exercicios-list'
 
-/* import { AvaliacaoForm } from '../../../components/avaliacao-form'
- */
 export const metadata: Metadata = {
   title: 'Exercícios| DoctorExe',
   description: 'Cadastro de exercícios',

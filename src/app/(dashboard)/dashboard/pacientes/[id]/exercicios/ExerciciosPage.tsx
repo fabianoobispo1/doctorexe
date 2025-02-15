@@ -1,47 +1,21 @@
 'use client'
 import Link from 'next/link'
 import { ArrowLeft, Plus } from 'lucide-react'
-import { useSession } from 'next-auth/react'
-import { useCallback, useEffect, useState } from 'react'
+import { useQuery } from 'convex/react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { api } from '@/lib/axios'
+import { api } from '@/convex/_generated/api'
+import type { Id } from '@/convex/_generated/dataModel'
 
 interface ExerciciosPageProps {
   idPaciente: string
 }
-interface Avaliacao {
-  id: string
-  dataAvaliacao: string
-  diagnosticoFisioterapeutico: string
-  escalaEva: number
-  created_at: string
-  updated_at: string
-}
 
 export default function ExerciciosPage({ idPaciente }: ExerciciosPageProps) {
-  const { data: session } = useSession()
-  const [avaliacoes, setAvaliacoes] = useState<Avaliacao[] | null>(null)
-
-  const loadAvaliacoes = useCallback(
-    async (id: string) => {
-      if (session) {
-        const response = await api.get(`doctorexe/paciente/${id}/exercicios`, {
-          headers: {
-            Authorization: `Bearer ${session.user.apiToken}`,
-          },
-        })
-        console.log(response.data.exercises)
-        setAvaliacoes(response.data.exercises)
-      }
-    },
-    [session],
-  )
-
-  useEffect(() => {
-    loadAvaliacoes(idPaciente)
-  }, [loadAvaliacoes, idPaciente])
+  const exercises = useQuery(api.exercicio.listByPatientId, {
+    patientId: idPaciente as Id<'paciente'>,
+  })
 
   return (
     <div className="flex flex-col gap-4 p-6">
@@ -64,42 +38,40 @@ export default function ExerciciosPage({ idPaciente }: ExerciciosPageProps) {
         </Link>
       </div>
 
-      {avaliacoes && avaliacoes.length > 0 ? (
+      {exercises && exercises.length > 0 ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {avaliacoes.map((avaliacao) => (
-            <Card key={avaliacao.id}>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span>Avaliação Fisioterápica</span>
-                  <span className="text-sm text-muted-foreground">
-                    {new Date(avaliacao.dataAvaliacao).toLocaleDateString(
-                      'pt-BR',
-                    )}
-                  </span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">
-                    EVA: {avaliacao.escalaEva}
-                  </span>
-                  <Link
-                    href={`/dashboard/pacientes/${idPaciente}/avaliacoes/${avaliacao.id}`}
-                  >
-                    <Button variant="outline" size="sm">
-                      Adicionar Exer
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+          {exercises &&
+            exercises.map((exercise) => (
+              <Card key={exercise?._id}>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span>Exercício</span>
+                    <span className="text-sm text-muted-foreground">
+                      {new Date(
+                        exercise?.created_at ?? Date.now(),
+                      ).toLocaleDateString('pt-BR')}
+                    </span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between">
+                    <Link
+                      href={`/dashboard/pacientes/${idPaciente}/exercicios/${exercise?._id}`}
+                    >
+                      <Button variant="outline" size="sm">
+                        Ver Detalhes
+                      </Button>
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
         </div>
       ) : (
         <Card className="p-8">
           <div className="flex flex-col items-center justify-center text-center">
             <h3 className="mt-2 text-lg font-semibold">
-              Nenhun exercício encontrado.
+              Nenhum exercício encontrado.
             </h3>
             <p className="mb-4 text-sm text-muted-foreground">
               Comece adicionando um exercício.
