@@ -66,21 +66,7 @@ const items = [
     url: '/dashboard/perfil',
     icon: UserPen,
   },
-  {
-    title: 'Pacientes',
-    url: '/dashboard/pacientes',
-    icon: Users,
-  },
-  {
-    title: 'Exercícios',
-    url: '/dashboard/exercicios',
-    icon: Dumbbell,
-  },
-  {
-    title: 'Fale conosco',
-    url: '/dashboard/fale-conosco',
-    icon: Mail,
-  },
+
   /*   {
     title: 'Avaliações',
     url: '/dashboard/avaliacoes',
@@ -102,6 +88,21 @@ const itemsAdm = [
     title: 'Administração',
     url: '/dashboard/admin',
     icon: Settings,
+  },
+  {
+    title: 'Pacientes',
+    url: '/dashboard/pacientes',
+    icon: Users,
+  },
+  {
+    title: 'Exercícios',
+    url: '/dashboard/exercicios',
+    icon: Dumbbell,
+  },
+  {
+    title: 'Fale conosco',
+    url: '/dashboard/fale-conosco',
+    icon: Mail,
   },
   /*   {
     title: 'Configurar WhatsApp',

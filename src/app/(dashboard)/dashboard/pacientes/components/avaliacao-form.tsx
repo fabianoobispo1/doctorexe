@@ -4,8 +4,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
 import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import axios from 'axios'
+import { useMutation } from 'convex/react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -19,8 +19,9 @@ import {
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { api } from '@/lib/axios'
 import { useToast } from '@/hooks/use-toast'
+import { api } from '@/convex/_generated/api'
+import type { Id } from '@/convex/_generated/dataModel'
 
 const formSchema = z.object({
   dataAvaliacao: z.string(),
@@ -45,8 +46,9 @@ interface AvaliacaoFormProps {
 
 export function AvaliacaoForm({ pacienteId }: AvaliacaoFormProps) {
   const router = useRouter()
-  const { data: session } = useSession()
   const { toast } = useToast()
+
+  const createAvaliacao = useMutation(api.avaliacoes.create)
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -60,29 +62,34 @@ export function AvaliacaoForm({ pacienteId }: AvaliacaoFormProps) {
       // Aqui virá a integração com a API
       console.log({ pacienteId, ...data })
 
-      if (session) {
-        const dataToSend = {
-          pacienteId,
-          ...data,
-        }
-        const response = await api.post(
-          '/doctorexe/avaliacao-fisio',
-          dataToSend,
-          {
-            headers: {
-              Authorization: `Bearer ${session.user.apiToken}`,
-            },
-          },
-        )
-        console.log(response.data)
+      const avaliacaoData = {
+        dataAvaliacao: Date.now(), // Converter para timestamp
+        altura: data.altura,
+        peso: data.peso,
+        pressaoArterial: data.pressaoArterial,
+        frequenciaCardiaca: data.frequenciaCardiaca,
+        diagnosticoFisioterapeutico: data.diagnosticoFisioterapeutico,
+        apresentacaoPaciente: {}, // Adicionar campo JSON
+        examesComplementares: {}, // Adicionar campo JSON
+        inspecaoPalpacao: {}, // Adicionar campo JSON
+        semiologia: data.semiologia,
+        testesEspecificos: data.testesEspecificos,
+        escalaEva: data.escalaEva,
+        objetivosTratamento: data.objetivosTratamento,
+        recursosTerapeuticos: data.recursosTerapeuticos,
+        planoTratamento: data.planoTratamento,
+        created_at: Date.now(),
+        updated_at: Date.now(),
+        pacienteId: pacienteId as Id<`paciente`>,
       }
+      await createAvaliacao(avaliacaoData)
 
       toast({
         title: 'Sucesso',
         description: 'Avaliação cadastrada com sucesso!',
       })
 
-      // router.push(`/pacientes/${pacienteId}/avaliacoes`)
+      router.push(`/pacientes/${pacienteId}/avaliacoes`)
     } catch (error) {
       const errorMessage = axios.isAxiosError(error)
         ? error.response?.data?.message || 'Erro Api Avaliação'

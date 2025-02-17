@@ -1,22 +1,37 @@
 'use client'
 import Link from 'next/link'
-import { ArrowLeft, Plus } from 'lucide-react'
+import { ArrowLeft, PlayCircle, Plus } from 'lucide-react'
 import { useQuery } from 'convex/react'
+import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 import { api } from '@/convex/_generated/api'
 import type { Id } from '@/convex/_generated/dataModel'
-
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { extractYouTubeID } from '@/lib/utils'
+import { ScrollArea } from '@/components/ui/scroll-area'
 interface ExerciciosPageProps {
   idPaciente: string
 }
 
 export default function ExerciciosPage({ idPaciente }: ExerciciosPageProps) {
+  const [selectedVideo, setSelectedVideo] = useState<string | null>(null)
+  const [isVideoOpen, setIsVideoOpen] = useState(false)
+
   const exercises = useQuery(api.exercicio.listByPatientId, {
     patientId: idPaciente as Id<'paciente'>,
   })
 
+  const handleVideoClick = (videoUrl: string) => {
+    setSelectedVideo(videoUrl)
+    setIsVideoOpen(true)
+  }
   return (
     <div className="flex flex-col gap-4 p-6">
       <div className="flex items-center justify-between">
@@ -39,34 +54,29 @@ export default function ExerciciosPage({ idPaciente }: ExerciciosPageProps) {
       </div>
 
       {exercises && exercises.length > 0 ? (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {exercises &&
-            exercises.map((exercise) => (
-              <Card key={exercise?._id}>
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <span>Exercício</span>
-                    <span className="text-sm text-muted-foreground">
-                      {new Date(
-                        exercise?.created_at ?? Date.now(),
-                      ).toLocaleDateString('pt-BR')}
-                    </span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between">
-                    <Link
-                      href={`/dashboard/pacientes/${idPaciente}/exercicios/${exercise?._id}`}
-                    >
-                      <Button variant="outline" size="sm">
-                        Ver Detalhes
-                      </Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-        </div>
+        <ScrollArea className="h-[calc(100vh-170px)]  w-full pr-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {exercises &&
+              exercises.map((exercise) => (
+                <Card key={exercise?._id}>
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <span>{exercise?.nome}</span>
+                      {exercise?.url_video && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleVideoClick(exercise.url_video)}
+                        >
+                          <PlayCircle className="h-6 w-6 text-primary" />
+                        </Button>
+                      )}
+                    </CardTitle>
+                  </CardHeader>
+                </Card>
+              ))}
+          </div>
+        </ScrollArea>
       ) : (
         <Card className="p-8">
           <div className="flex flex-col items-center justify-center text-center">
@@ -79,6 +89,26 @@ export default function ExerciciosPage({ idPaciente }: ExerciciosPageProps) {
           </div>
         </Card>
       )}
+
+      <Dialog open={isVideoOpen} onOpenChange={setIsVideoOpen}>
+        <DialogContent className="sm:max-w-[800px]">
+          <DialogHeader>
+            <DialogTitle>Vídeo do Exercício</DialogTitle>
+          </DialogHeader>
+          {selectedVideo && (
+            <div className="aspect-video w-full">
+              <iframe
+                width="100%"
+                height="100%"
+                src={`https://www.youtube.com/embed/${extractYouTubeID(selectedVideo)}`}
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
