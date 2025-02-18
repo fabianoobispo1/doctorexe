@@ -8,14 +8,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 import { api } from '@/convex/_generated/api'
 import type { Id } from '@/convex/_generated/dataModel'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { extractYouTubeID } from '@/lib/utils'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { VideoDialog } from '@/components/VideoDialog'
 interface ExerciciosPageProps {
   idPaciente: string
 }
@@ -90,25 +84,11 @@ export default function ExerciciosPage({ idPaciente }: ExerciciosPageProps) {
         </Card>
       )}
 
-      <Dialog open={isVideoOpen} onOpenChange={setIsVideoOpen}>
-        <DialogContent className="sm:max-w-[800px]">
-          <DialogHeader>
-            <DialogTitle>Vídeo do Exercício</DialogTitle>
-          </DialogHeader>
-          {selectedVideo && (
-            <div className="aspect-video w-full">
-              <iframe
-                width="100%"
-                height="100%"
-                src={`https://www.youtube.com/embed/${extractYouTubeID(selectedVideo)}`}
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <VideoDialog
+        isOpen={isVideoOpen}
+        onOpenChange={setIsVideoOpen}
+        videoUrl={selectedVideo}
+      />
     </div>
   )
 }

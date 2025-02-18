@@ -30,7 +30,7 @@ export const create = mutation({
   },
 })
 
-export const getByEmail = query({
+export const getByEmailInicial = query({
   args: {
     email: v.string(),
   },
@@ -39,9 +39,34 @@ export const getByEmail = query({
       .query('paciente')
       .withIndex('by_email', (q) => q.eq('email', email))
       .unique()
-    return paciente
+
+    if (!paciente) return null
+
+    // Busca os exercícios do paciente
+    const patientExercises = await db
+      .query('patientExercise')
+      .withIndex('by_patient', (q) => q.eq('patient_id', paciente._id))
+      .collect()
+
+    // Busca os detalhes de cada exercício
+    const exercisesDetails = await Promise.all(
+      patientExercises.map(async (exercicios) => {
+        const exercise = await db.get(exercicios.exercise_id)
+        return {
+          ...exercicios,
+          exerciseDetails: exercise,
+        }
+      }),
+    )
+
+    // Retorna paciente com exercícios
+    return {
+      ...paciente,
+      exercises: exercisesDetails,
+    }
   },
 })
+
 export const getByID = query({
   args: {
     pacienteId: v.id('paciente'),
