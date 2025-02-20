@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Spinner } from '@/components/ui/spinner'
 import { extractYouTubeID } from '@/lib/utils'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 interface ExerciciosListProps {
   pascienteId: string
@@ -84,32 +85,35 @@ export const ExerciciosList = ({ pascienteId }: ExerciciosListProps) => {
     <div className="space-y-4">
       <div className="grid gap-4">
         {loading ? <Spinner /> : null}
-        {exercises?.map((exercise) => (
-          <div
-            key={exercise._id}
-            className="flex items-center space-x-2 border p-4 rounded-md"
-          >
-            <Checkbox
-              checked={selectedExercises.includes(exercise._id)}
-              onCheckedChange={() => handleCheckboxChange(exercise._id)}
-            />
-            <div>
-              <h3 className="font-medium">{exercise.nome}</h3>
-              <p className="text-sm text-gray-500">{exercise.descricao}</p>
+        <ScrollArea className="h-[calc(100vh-220px)]  w-full pr-4">
+          {' '}
+          {exercises?.map((exercise) => (
+            <div
+              key={exercise._id}
+              className="flex items-center space-x-2 border p-4 rounded-md"
+            >
+              <Checkbox
+                checked={selectedExercises.includes(exercise._id)}
+                onCheckedChange={() => handleCheckboxChange(exercise._id)}
+              />
+              <div>
+                <h3 className="font-medium">{exercise.nome}</h3>
+                <p className="text-sm text-gray-500">{exercise.descricao}</p>
 
-              <div className="w-40 aspect-video">
-                <iframe
-                  width="100%"
-                  height="100%"
-                  src={`https://www.youtube.com/embed/${extractYouTubeID(exercise.url_video)}`}
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
+                <div className="w-40 aspect-video">
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    src={`https://www.youtube.com/embed/${extractYouTubeID(exercise.url_video)}`}
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </ScrollArea>
       </div>
 
       <Button onClick={handleSave} className="w-full">

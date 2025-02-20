@@ -46,9 +46,8 @@ export default function ExerciciosPage({ idPaciente }: ExerciciosPageProps) {
           </Button>
         </Link>
       </div>
-
-      {exercises && exercises.length > 0 ? (
-        <ScrollArea className="h-[calc(100vh-170px)]  w-full pr-4">
+      <ScrollArea className="h-[calc(100vh-170px)]  w-full pr-4">
+        {exercises && exercises.length > 0 ? (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {exercises &&
               exercises.map((exercise) => (
@@ -70,19 +69,19 @@ export default function ExerciciosPage({ idPaciente }: ExerciciosPageProps) {
                 </Card>
               ))}
           </div>
-        </ScrollArea>
-      ) : (
-        <Card className="p-8">
-          <div className="flex flex-col items-center justify-center text-center">
-            <h3 className="mt-2 text-lg font-semibold">
-              Nenhum exercício encontrado.
-            </h3>
-            <p className="mb-4 text-sm text-muted-foreground">
-              Comece adicionando um exercício.
-            </p>
-          </div>
-        </Card>
-      )}
+        ) : (
+          <Card className="p-8">
+            <div className="flex flex-col items-center justify-center text-center">
+              <h3 className="mt-2 text-lg font-semibold">
+                Nenhum exercício encontrado.
+              </h3>
+              <p className="mb-4 text-sm text-muted-foreground">
+                Comece adicionando um exercício.
+              </p>
+            </div>
+          </Card>
+        )}
+      </ScrollArea>
 
       <VideoDialog
         isOpen={isVideoOpen}
