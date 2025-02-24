@@ -33,3 +33,19 @@ export const getAvaliacaoById = query({
     return avaliacao
   },
 })
+
+export const remove = mutation({
+  args: {
+    avaliacaoId: v.id('avaliacaoFisio'),
+  },
+  handler: async ({ db }, { avaliacaoId }) => {
+    const avaliacao = await db.get(avaliacaoId)
+    if (!avaliacao) {
+      throw new Error('Avaliação não encontrada')
+    }
+
+    await db.delete(avaliacaoId)
+
+    return { success: true, message: 'Avaliação removida com sucesso' }
+  },
+})

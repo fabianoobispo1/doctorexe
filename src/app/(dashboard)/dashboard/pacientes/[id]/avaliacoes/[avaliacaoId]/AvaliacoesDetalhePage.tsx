@@ -1,8 +1,9 @@
 'use client'
 import Link from 'next/link'
-import { ArrowLeft, Printer } from 'lucide-react'
-import { useQuery } from 'convex/react'
+import { ArrowLeft, Printer, Trash } from 'lucide-react'
+import { useQuery, useMutation } from 'convex/react'
 
+import { useToast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { api } from '@/convex/_generated/api'
@@ -22,6 +23,27 @@ export default function AvaliacoesDetalhePage({
     avaliacaoId: idAvaliacao as Id<'avaliacaoFisio'>,
   })
 
+  const { toast } = useToast()
+  const remove = useMutation(api.avaliacoes.remove)
+
+  const handleRemove = async () => {
+    try {
+      await remove({ avaliacaoId: idAvaliacao as Id<'avaliacaoFisio'> })
+      toast({
+        title: 'Avaliação removida com sucesso',
+        variant: 'default',
+      })
+      // Redirecionar para a lista de avaliações
+      window.location.href = `/dashboard/pacientes/${idPaciente}/avaliacoes`
+    } catch (error) {
+      console.log(error)
+      toast({
+        title: 'Erro ao remover avaliação',
+        variant: 'destructive',
+      })
+    }
+  }
+
   if (!avaliacao) {
     return <div>Carregando...</div>
   }
@@ -39,10 +61,16 @@ export default function AvaliacoesDetalhePage({
             Avaliação Física
           </h1>
         </div>
-        <Button variant="outline">
-          <Printer className="mr-2 h-4 w-4" />
-          Imprimir
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline">
+            <Printer className="mr-2 h-4 w-4" />
+            Imprimir
+          </Button>
+          <Button variant="destructive" onClick={handleRemove}>
+            <Trash className="mr-2 h-4 w-4" />
+            Remover
+          </Button>
+        </div>
       </div>
       <ScrollArea className="h-[calc(100vh-170px)]  w-full pr-4">
         <div className="grid gap-4">
