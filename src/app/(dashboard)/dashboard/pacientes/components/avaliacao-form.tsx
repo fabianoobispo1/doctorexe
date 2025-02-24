@@ -89,7 +89,7 @@ export function AvaliacaoForm({ pacienteId }: AvaliacaoFormProps) {
         description: 'Avaliação cadastrada com sucesso!',
       })
 
-      router.push(`/pacientes/${pacienteId}/avaliacoes`)
+      router.push(`/dashboard/pacientes/${pacienteId}/avaliacoes`)
     } catch (error) {
       const errorMessage = axios.isAxiosError(error)
         ? error.response?.data?.message || 'Erro Api Avaliação'

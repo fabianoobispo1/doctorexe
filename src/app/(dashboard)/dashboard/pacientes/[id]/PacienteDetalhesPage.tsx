@@ -131,13 +131,13 @@ export default function PacienteDetalhesPage({
                   <Button className="w-full">Exercícios</Button>
                 </Link>
                 <Link href={`/dashboard/pacientes/${paciente._id}/avaliacoes`}>
-                  <Button className="w-full">Nova Avaliação</Button>
+                  <Button className="w-full">Avaliações</Button>
                 </Link>
-                <Link href={`/dashboard/pacientes/${paciente._id}/historico`}>
+                {/*    <Link href={`/dashboard/pacientes/${paciente._id}/historico`}>
                   <Button variant="outline" className="w-full">
                     Ver Histórico
                   </Button>
-                </Link>
+                </Link> */}
 
                 <AlertDialog>
                   <AlertDialogTrigger asChild>

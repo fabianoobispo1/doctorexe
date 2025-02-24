@@ -97,11 +97,11 @@ export const columns: ColumnDef<Paciente>[] = [
                 Avaliações
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem>
+            {/*  <DropdownMenuItem>
               <Link href={`/dashboard/pacientes/${paciente.id}/historico`}>
                 Histórico
               </Link>
-            </DropdownMenuItem>
+            </DropdownMenuItem> */}
           </DropdownMenuContent>
         </DropdownMenu>
       )
