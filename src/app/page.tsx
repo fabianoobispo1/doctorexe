@@ -1,13 +1,6 @@
 import { Metadata } from 'next'
-import Link from 'next/link'
 
-import {
-  FacebookIcon,
-  InstagramIcon,
-  YoutubeIcon,
-  WhatsAppIcon,
-} from '@/components/icons'
-import FaleConoscoForm from '@/components/forms/fale-conosco-form'
+import AuthenticationModal from '@/components/signin/authentication-modal'
 
 export const metadata: Metadata = {
   title: 'DoctorExe',
@@ -17,9 +10,14 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return (
     <div className="w-full overflow-x-hidden h-screen">
-      <main className="flex flex-col w-full">
-        {/* Hero Section */}
-        <section className="bg-gradient-to-b from-blue-900 to-blue-700 py-16">
+      <div className="relative h-screen flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
+        <p className="text-lg"></p>
+        <AuthenticationModal />
+      </div>
+
+      {/* <main className="flex flex-col w-full"> */}
+      {/* Hero Section */}
+      {/*   <section className="bg-gradient-to-b from-blue-900 to-blue-700 py-16">
           <div className="container mx-auto px-4 py-16">
             <div className="text-center">
               <h1 className="text-5xl font-bold text-white mb-6">FisioSport</h1>
@@ -65,10 +63,10 @@ export default function HomePage() {
               </Link>
             </div>
           </div>
-        </section>
+        </section> */}
 
-        {/* Produtos Afiliados */}
-        {/*       <section className="py-16 bg-white">
+      {/* Produtos Afiliados */}
+      {/*       <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold text-center mb-12">
               Catálogo de Produtos
@@ -107,20 +105,20 @@ export default function HomePage() {
           </div>
         </section> */}
 
-        {/* WhatsApp Float Button */}
-        <Link
+      {/* WhatsApp Float Button */}
+      {/*     <Link
           href="https://wa.me/+553299942252"
           className="fixed bottom-6 right-6 bg-green-500 text-white p-2 rounded-full shadow-lg hover:bg-green-600 transition-colors flex items-center justify-center w-14 h-14"
           target="_blank"
         >
           <WhatsAppIcon />
         </Link>
-
-        {/* Formulário de Contato */}
-        <section className="py-16 bg-gray-100">
+ */}
+      {/* Formulário de Contato */}
+      {/*     <section className="py-16 bg-gray-100">
           <FaleConoscoForm />
-        </section>
-      </main>
+        </section> */}
+      {/* </main> */}
     </div>
   )
 }

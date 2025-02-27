@@ -42,40 +42,24 @@ export const UpdateUser = mutation({
     userId: v.id('user'),
     nome: v.optional(v.string()),
     email: v.optional(v.string()),
-    provider: v.optional(v.string()),
+    data_nascimento: v.optional(v.number()),
+    cpf: v.optional(v.string()),
     image: v.optional(v.string()),
     image_key: v.optional(v.string()),
-    data_nascimento: v.optional(v.number()),
-    password: v.optional(v.string()),
   },
-  handler: async (
-    { db },
-    {
-      userId,
-      nome,
-      email,
-      provider,
-      image,
-      data_nascimento,
-      image_key,
-      password,
-    },
-  ) => {
-    // Buscar o usuario atual
-    const usuario = await db.get(userId)
+  handler: async ({ db }, args) => {
+    const usuario = await db.get(args.userId)
     if (!usuario) {
       throw new Error('Usuario não encontrado')
     }
 
-    // altera os valores
-    const updateUser = await db.patch(userId, {
-      nome,
-      email,
-      provider,
-      image,
-      data_nascimento,
-      image_key,
-      password,
+    const updateUser = await db.patch(args.userId, {
+      nome: args.nome,
+      email: args.email,
+      data_nascimento: args.data_nascimento,
+      cpf: args.cpf,
+      image: args.image,
+      image_key: args.image_key,
     })
 
     return updateUser

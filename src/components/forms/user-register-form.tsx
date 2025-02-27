@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/form'
 import { useToast } from '@/hooks/use-toast'
 import { api } from '@/convex/_generated/api'
+import { formatCPF } from '@/lib/utils'
 
 import { LoadingButton } from '../ui/loading-button'
 
@@ -26,6 +27,8 @@ const formSchema = z
     email: z.string().email({ message: 'Digite um email valido.' }),
     password: z.string().min(8, { message: 'Senha obrigatoria, min 8' }),
     confirmPassword: z.string().min(8, { message: 'Senha obrigatoria, min 8' }),
+    cpf: z.string().min(11, { message: 'CPF inválido' }),
+    dataNascimento: z.string().min(1, 'Data de nascimento é obrigatória'),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: 'As senhas não coecindem',
@@ -46,6 +49,8 @@ export default function UserRegisterForm({ setButton }: UserRegisterFormProps) {
     password: '',
     nome: '',
     confirmPassword: '',
+    cpf: '',
+    dataNascimento: '',
   }
   const form = useForm<UserFormValue>({
     resolver: zodResolver(formSchema),
@@ -77,6 +82,8 @@ export default function UserRegisterForm({ setButton }: UserRegisterFormProps) {
         role: 'user',
         image: 'empty',
         nome: data.nome,
+        cpf: formatCPF(data.cpf),
+        data_nascimento: new Date(data.dataNascimento).getTime(),
       })
 
       if (!user) {
@@ -153,6 +160,38 @@ export default function UserRegisterForm({ setButton }: UserRegisterFormProps) {
               </FormItem>
             )}
           />
+          <FormField
+            control={form.control}
+            name="cpf"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>CPF</FormLabel>
+                <FormControl>
+                  <Input
+                    disabled={loading}
+                    placeholder="000.000.000-00"
+                    value={formatCPF(field.value)}
+                    onChange={(e) => field.onChange(formatCPF(e.target.value))}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="dataNascimento"
+            render={({ field }) => (
+              <FormItem className="px-2">
+                <FormLabel>Data de Nascimento</FormLabel>
+                <FormControl>
+                  <Input type="date" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={form.control}
             name="password"

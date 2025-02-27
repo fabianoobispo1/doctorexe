@@ -4,18 +4,9 @@ import { useCallback, useEffect, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { useSession } from 'next-auth/react'
-import { format } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
-import { CalendarIcon } from 'lucide-react'
 import { fetchMutation, fetchQuery } from 'convex/nextjs'
 
-import { Calendar } from '@/components/ui/calendar'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
-import { cn, formatCPF } from '@/lib/utils'
+import { formatCPF } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import {
@@ -38,37 +29,15 @@ const formSchema = z.object({
   id: z.string().optional(),
   nome: z.string().min(3, { message: 'Nome precisa ser preenchido.' }),
   email: z.string().email({ message: 'Digite um email valido.' }),
-  cpf: z
-    .string({
-      required_error: 'CPF é obrigatório',
-      invalid_type_error: 'Formato de CPF inválido',
-    })
-    .min(1, 'CPF é obrigatório'),
-  data_nascimento: z.preprocess(
-    (val) => (val === null ? undefined : val), // Transforma null em undefined
-    z.date({
-      required_error: 'A data de nascimento precisa ser preenchida.',
-    }),
-  ),
+  cpf: z.string().min(11, { message: 'CPF inválido' }),
+  data_nascimento: z.string().min(1, 'Data de nascimento é obrigatória'),
   image: z
     .object({
-      url: z.string(),
-      key: z.string(),
+      url: z.string().optional(),
+      key: z.string().optional(),
     })
     .nullable()
     .optional(),
-  /*  data_nascimento: z.preprocess(
-      (val) => (val === null ? undefined : val), // Transforma null em undefined
-      z.date({
-        required_error: 'A data de nascimento precisa ser preenchida.',
-      }),
-    ),
-  
-    image: z.string().optional(),
-    provider: z.string().optional(),
-    oldPassword: z.string().optional(),
-    password: z.string().optional(),
-    confirmPassword: z.string().optional(), */
 })
 
 type ProductFormValues = z.infer<typeof formSchema>
@@ -87,7 +56,7 @@ export const PerfilForm: React.FC = () => {
     nome: '',
     email: '',
     cpf: '',
-    data_nascimento: undefined,
+    data_nascimento: '',
     image: null,
     /*  oldPassword: '',
     password: '',
@@ -116,15 +85,14 @@ export const PerfilForm: React.FC = () => {
         if (response.provider !== 'credentials') {
           setBloqueioProvider(true)
         }
-
+        console.log(response)
         form.reset({
           id: response._id,
           nome: response.nome,
           email: response.email,
           data_nascimento: response.data_nascimento
-            ? new Date(response.data_nascimento)
-            : undefined,
-
+            ? new Date(response.data_nascimento).toISOString().split('T')[0]
+            : '',
           cpf: response.cpf,
           image: response.image
             ? {
@@ -140,7 +108,6 @@ export const PerfilForm: React.FC = () => {
       }
     }
   }, [session, form])
-
   useEffect(() => {
     if (session) {
       if (!carregou) {
@@ -183,12 +150,9 @@ export const PerfilForm: React.FC = () => {
       email: data.email,
       nome: data.nome,
       cpf: data.cpf,
-      data_nascimento: data.data_nascimento
-        ? data.data_nascimento.toISOString()
-        : null,
-
-      image: data.image?.url,
-      image_key: data.image?.key,
+      data_nascimento: new Date(data.data_nascimento).getTime(),
+      /*       image: data.image?.url,
+      image_key: data.image?.key, */
       /*  data_nascimento: timestamp,
       provider: data.provider,
       password,
@@ -199,11 +163,14 @@ export const PerfilForm: React.FC = () => {
     await fetchMutation(api.user.UpdateUser, {
       userId: data.id as Id<'user'>,
       email: data.email,
-      /*  image: data.image, */
       nome: data.nome,
-      /*   data_nascimento: timestamp,
+      data_nascimento: new Date(data.data_nascimento).getTime(),
+      cpf: data.cpf,
+      image: data.image?.url,
+      image_key: data.image?.key,
+      /*   
       provider: data.provider,
-      image_key: imgKey,
+     
       password, */
     })
 
@@ -235,7 +202,14 @@ export const PerfilForm: React.FC = () => {
               <FormItem>
                 <FormControl>
                   <ImageUpload
-                    value={field.value ?? null}
+                    value={
+                      field.value
+                        ? {
+                            url: field.value.url || '',
+                            key: field.value.key || '',
+                          }
+                        : null
+                    }
                     onChange={field.onChange}
                     disabled={loading}
                   />
@@ -291,16 +265,17 @@ export const PerfilForm: React.FC = () => {
             <FormField
               control={form.control}
               name="cpf"
-              render={({ field: { onChange, value, ...field } }) => (
-                <FormItem className="flex flex-col">
+              render={({ field }) => (
+                <FormItem>
                   <FormLabel>CPF</FormLabel>
                   <FormControl>
                     <Input
                       disabled={loading}
                       placeholder="000.000.000-00"
-                      value={value || ''}
-                      onChange={(e) => onChange(formatCPF(e.target.value))}
-                      {...field}
+                      value={formatCPF(field.value)}
+                      onChange={(e) =>
+                        field.onChange(formatCPF(e.target.value))
+                      }
                     />
                   </FormControl>
                   <FormMessage />
@@ -311,40 +286,11 @@ export const PerfilForm: React.FC = () => {
               control={form.control}
               name="data_nascimento"
               render={({ field }) => (
-                <FormItem className="flex flex-col">
+                <FormItem className="px-2">
                   <FormLabel>Data de Nascimento</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant={'outline'}
-                          className={cn(
-                            'w-full pl-3 text-left font-normal',
-                            !field.value && 'text-muted-foreground',
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, 'PPP', { locale: ptBR })
-                          ) : (
-                            <span>Selecione uma data</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={(date) =>
-                          date > new Date() || date < new Date('1900-01-01')
-                        }
-                        initialFocus
-                        locale={ptBR}
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <FormControl>
+                    <Input type="date" {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
