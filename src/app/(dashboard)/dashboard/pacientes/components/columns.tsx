@@ -82,21 +82,15 @@ export const columns: ColumnDef<Paciente>[] = [
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem>
-              <Link href={`/dashboard/pacientes/${paciente.id}`}>
-                Ver detalhes
-              </Link>
-            </DropdownMenuItem>
-            {/*   <DropdownMenuItem>
-              <Link href={`/dashboard/pacientes/${paciente.id}/editar`}>
-                Editar ficha
-              </Link>
-            </DropdownMenuItem> */}
-            <DropdownMenuItem>
-              <Link href={`/dashboard/pacientes/${paciente.id}/avaliacoes`}>
-                Avaliações
-              </Link>
-            </DropdownMenuItem>
+            <Link href={`/dashboard/pacientes/${paciente.id}`}>
+              <DropdownMenuItem>Ver detalhes</DropdownMenuItem>
+            </Link>
+            <Link href={`/dashboard/pacientes/${paciente.id}/editar`}>
+              <DropdownMenuItem>Editar</DropdownMenuItem>
+            </Link>
+            <Link href={`/dashboard/pacientes/${paciente.id}/avaliacoes`}>
+              <DropdownMenuItem>Avaliações</DropdownMenuItem>
+            </Link>
             {/*  <DropdownMenuItem>
               <Link href={`/dashboard/pacientes/${paciente.id}/historico`}>
                 Histórico

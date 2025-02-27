@@ -31,12 +31,15 @@ import { useToast } from '@/hooks/use-toast'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { api } from '@/convex/_generated/api'
 import { Id } from '@/convex/_generated/dataModel'
+import { formatCPF } from '@/lib/utils'
 
 interface PacienteFormProps {
   pacienteId?: string
 }
 const formSchema = z.object({
+  id: z.string().optional(),
   nome: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres'),
+  cpf: z.string().min(11, { message: 'CPF inválido' }),
   dataNascimento: z.string().min(1, 'Data de nascimento é obrigatória'),
   telefone: z.string().min(10, 'Telefone inválido'),
   email: z.string().email('Email inválido'),
@@ -58,11 +61,14 @@ export function PacienteForm({ pacienteId }: PacienteFormProps) {
   const { toast } = useToast()
 
   const createPaciente = useMutation(api.paciente.create)
+  const updatePaciente = useMutation(api.paciente.UpdatePaciente)
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      id: '',
       nome: '',
+      cpf: '',
       dataNascimento: '',
       telefone: '',
       email: '',
@@ -88,7 +94,9 @@ export function PacienteForm({ pacienteId }: PacienteFormProps) {
 
           if (response) {
             const formattedData = {
+              id: response._id,
               nome: response.nome,
+              cpf: response.cpf,
               dataNascimento: new Date(response.dataNascimento)
                 .toISOString()
                 .split('T')[0],
@@ -127,12 +135,26 @@ export function PacienteForm({ pacienteId }: PacienteFormProps) {
     try {
       if (pacienteId) {
         // Edição - PUT
-        console.log('Editando paciente:', data)
-        /*  await api.put(`/doctorexe/pacientes/${paciente.id}`, data, {
-            headers: {
-              Authorization: `Bearer ${session.user.apiToken}`,
-            },
-          }) */
+
+        const dataToSend = {
+          pacienteId: data.id as Id<'paciente'>,
+          nome: data.nome,
+          cpf: data.cpf,
+          dataNascimento: new Date(data.dataNascimento).getTime(),
+          telefone: data.telefone,
+          email: data.email,
+          sexo: data.sexo,
+          cidade: data.cidade,
+          bairro: data.bairro,
+          empresa: data.empresa,
+          enderecoResidencial: data.enderecoResidencial,
+          enderecoComercial: data.enderecoComercial || '', // Fornece valor padrão vazio
+          naturalidade: data.naturalidade,
+          estadoCivil: data.estadoCivil,
+        }
+
+        await updatePaciente(dataToSend)
+
         toast({
           title: 'Sucesso',
           description: 'Paciente atualizado com sucesso.',
@@ -141,6 +163,7 @@ export function PacienteForm({ pacienteId }: PacienteFormProps) {
         // add
         const dataToSend = {
           nome: data.nome,
+          cpf: data.cpf,
           dataNascimento: new Date(data.dataNascimento).getTime(),
           telefone: data.telefone,
           email: data.email,
@@ -153,7 +176,6 @@ export function PacienteForm({ pacienteId }: PacienteFormProps) {
           naturalidade: data.naturalidade,
           estadoCivil: data.estadoCivil,
           created_at: Date.now(),
-          historicoMedico: undefined,
           avaliacoes: [],
           exercicios: [],
         }
@@ -175,7 +197,7 @@ export function PacienteForm({ pacienteId }: PacienteFormProps) {
 
     setLoading(false)
 
-    router.push('/dashboard/pacientes')
+    // router.push('/dashboard/pacientes')
   }
 
   return (
@@ -195,12 +217,47 @@ export function PacienteForm({ pacienteId }: PacienteFormProps) {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
+              name="id"
+              render={({ field }) => (
+                <FormItem className=" flex-col hidden ">
+                  <FormLabel>id</FormLabel>
+                  <FormControl>
+                    <Input disabled={loading} placeholder="id" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
               name="nome"
               render={({ field }) => (
                 <FormItem className="px-2">
                   <FormLabel>Nome Completo</FormLabel>
                   <FormControl>
                     <Input placeholder="Nome do paciente" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="cpf"
+              render={({ field }) => (
+                <FormItem className="px-2">
+                  <FormLabel>CPF</FormLabel>
+                  <FormControl>
+                    <Input
+                      disabled={loading}
+                      placeholder="000.000.000-00"
+                      value={formatCPF(field.value)}
+                      onChange={(e) =>
+                        field.onChange(formatCPF(e.target.value))
+                      }
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

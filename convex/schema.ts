@@ -31,6 +31,7 @@ export const todoSchema = {
 
 export const pacienteSchema = {
   nome: v.string(),
+  cpf: v.optional(v.string()),
   dataNascimento: v.number(), // No Convex usamos timestamp
   telefone: v.string(),
   email: v.string(),
@@ -45,28 +46,12 @@ export const pacienteSchema = {
   created_at: v.number(), // Timestamp para data de criação
   // Relacionamentos serão implementados como IDs
   avaliacoes: v.optional(v.array(v.id('avaliacaoFisio'))),
-  historicoMedico: v.optional(v.id('historicoMedico')),
   exercicios: v.optional(v.array(v.id('patientExercise'))),
 }
 
-export const historicoMedicoSchema = {
-  diagnosticoClinico: v.string(),
-  historiaClinica: v.string(),
-  queixaPrincipal: v.string(),
-  habitosVida: v.string(),
-  hma: v.string(),
-  hmp: v.string(),
-  antecedentePessoal: v.string(),
-  antecedenteFamiliar: v.string(),
-  tratamentosRealizados: v.string(),
-  medicamentos: v.any(), // Para campos JSON
-  cirurgias: v.any(), // Para campos JSON
-  pacienteId: v.id('paciente'), // Referência ao paciente
-  created_at: v.number(), // Timestamp de criação
-}
-
 export const avaliacaoFisioSchema = {
-  dataAvaliacao: v.number(), // DateTime as timestamp
+  cod_ficha: v.optional(v.string()),
+  dataAvaliacao: v.number(), // DateTime as stimestamp
   altura: v.number(),
   peso: v.number(),
   pressaoArterial: v.string(),
@@ -133,9 +118,6 @@ export default defineSchema({
   avaliacaoFisio: defineTable(avaliacaoFisioSchema)
     .index('by_paciente', ['pacienteId'])
     .index('by_data', ['dataAvaliacao']),
-  historicoMedico: defineTable(historicoMedicoSchema).index('by_paciente', [
-    'pacienteId',
-  ]),
   exercise: defineTable(exerciseSchema).index('by_nome', ['nome']),
   patientExercise: defineTable(patientExerciseSchema)
     .index('by_patient', ['patient_id'])

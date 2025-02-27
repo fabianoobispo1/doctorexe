@@ -95,3 +95,46 @@ export const remove = mutation({
     return { success: true, message: 'pacienteId removido com sucesso' }
   },
 })
+
+export const UpdatePaciente = mutation({
+  args: {
+    pacienteId: v.id('paciente'),
+    nome: v.optional(v.string()),
+    cpf: v.optional(v.string()),
+    dataNascimento: v.optional(v.number()),
+    telefone: v.optional(v.string()),
+    email: v.optional(v.string()),
+    sexo: v.optional(v.string()),
+    cidade: v.optional(v.string()),
+    bairro: v.optional(v.string()),
+    empresa: v.optional(v.string()),
+    enderecoResidencial: v.optional(v.string()),
+    enderecoComercial: v.optional(v.string()),
+    naturalidade: v.optional(v.string()),
+    estadoCivil: v.optional(v.string()),
+  },
+  handler: async ({ db }, args) => {
+    const paciente = await db.get(args.pacienteId)
+    if (!paciente) {
+      throw new Error('Paciente não encontrado')
+    }
+
+    const updatePaciente = await db.patch(args.pacienteId, {
+      nome: args.nome,
+      cpf: args.cpf,
+      dataNascimento: args.dataNascimento,
+      telefone: args.telefone,
+      email: args.email,
+      sexo: args.sexo,
+      cidade: args.cidade,
+      bairro: args.bairro,
+      empresa: args.empresa,
+      enderecoResidencial: args.enderecoResidencial,
+      enderecoComercial: args.enderecoComercial,
+      naturalidade: args.naturalidade,
+      estadoCivil: args.estadoCivil,
+    })
+
+    return updatePaciente
+  },
+})
