@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { useToast } from '@/hooks/use-toast'
 import { api } from '@/convex/_generated/api'
 import type { Id } from '@/convex/_generated/dataModel'
@@ -268,12 +268,13 @@ export function AvaliacaoForm({ pacienteId }: AvaliacaoFormProps) {
                     <FormItem>
                       <FormLabel>Intensidade da Dor</FormLabel>
                       <FormControl>
-                        <div className="flex gap-1">
-                          {[...Array(11)].map((_, index) => (
-                            <Button
-                              key={index}
-                              type="button"
-                              className={`
+                        <ScrollArea className="w-full">
+                          <div className="flex gap-1 pb-4">
+                            {[...Array(11)].map((_, index) => (
+                              <Button
+                                key={index}
+                                type="button"
+                                className={`
                   w-8 md:w-12 h-12 font-bold transition-all
                   ${field.value === index ? 'ring-2 ring-offset-2 ring-primary scale-110' : 'hover:scale-105'}
                   ${
@@ -287,14 +288,16 @@ export function AvaliacaoForm({ pacienteId }: AvaliacaoFormProps) {
                   }
                   ${field.value === index ? 'opacity-100' : 'opacity-70'}
                 `}
-                              onClick={() => field.onChange(index)}
-                            >
-                              {index}
-                            </Button>
-                          ))}
-                        </div>
+                                onClick={() => field.onChange(index)}
+                              >
+                                {index}
+                              </Button>
+                            ))}
+                          </div>
+                          <ScrollBar orientation="horizontal" />
+                        </ScrollArea>
                       </FormControl>
-                      <div className="mt-4 flex gap-2 justify-start text-sm text-muted-foreground">
+                      <div className="mt-4 flex flex-col md:flex-row gap-2 justify-start text-sm text-muted-foreground">
                         <span className="text-green-500">Sem dor (0)</span>
                         <span className="text-yellow-500">Dor leve (1-3)</span>
                         <span className="text-orange-500">

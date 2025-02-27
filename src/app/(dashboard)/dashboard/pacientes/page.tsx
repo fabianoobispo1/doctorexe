@@ -44,7 +44,6 @@ export default function PacientesPage() {
       estadoCivil: p.estadoCivil,
       created_at: new Date(p.created_at).toISOString(),
       avaliacoes: p.avaliacoes,
-      historicoMedico: p.historicoMedico,
       exercicios: p.exercicios,
     })) || []
 

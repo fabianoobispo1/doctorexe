@@ -52,7 +52,6 @@ export type PacienteProps = {
   estadoCivil: string
   created_at: number
   avaliacoes?: Id<'avaliacaoFisio'>[]
-  historicoMedico?: Id<'historicoMedico'>
   exercicios?: Id<'patientExercise'>[]
 }
 
