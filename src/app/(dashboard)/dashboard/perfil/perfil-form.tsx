@@ -93,7 +93,7 @@ export const PerfilForm: React.FC = () => {
           data_nascimento: response.data_nascimento
             ? new Date(response.data_nascimento).toISOString().split('T')[0]
             : '',
-          cpf: response.cpf,
+          cpf: response.cpf ? formatCPF(response.cpf) : '',
           image: response.image
             ? {
                 url: response.image,
@@ -199,7 +199,7 @@ export const PerfilForm: React.FC = () => {
             control={form.control}
             name="image"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="px-2">
                 <FormControl>
                   <ImageUpload
                     value={
@@ -223,7 +223,7 @@ export const PerfilForm: React.FC = () => {
               control={form.control}
               name="id"
               render={({ field }) => (
-                <FormItem className=" flex-col hidden">
+                <FormItem className=" flex-col hidden ">
                   <FormLabel>id</FormLabel>
                   <FormControl>
                     <Input disabled={loading} placeholder="id" {...field} />
@@ -236,7 +236,7 @@ export const PerfilForm: React.FC = () => {
               control={form.control}
               name="nome"
               render={({ field }) => (
-                <FormItem className="flex flex-col">
+                <FormItem className="flex flex-col px-2">
                   <FormLabel>Nome</FormLabel>
                   <FormControl>
                     <Input disabled={loading} placeholder="Nome" {...field} />
@@ -249,7 +249,7 @@ export const PerfilForm: React.FC = () => {
               control={form.control}
               name="email"
               render={({ field }) => (
-                <FormItem className="flex flex-col">
+                <FormItem className="flex flex-col px-2">
                   <FormLabel>Email</FormLabel>
                   <FormControl>
                     <Input
@@ -266,7 +266,7 @@ export const PerfilForm: React.FC = () => {
               control={form.control}
               name="cpf"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="px-2">
                   <FormLabel>CPF</FormLabel>
                   <FormControl>
                     <Input
@@ -315,7 +315,7 @@ export const PerfilForm: React.FC = () => {
                   control={form.control}
                   name="oldPassword"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="px-2">
                       <FormLabel>Senha antiga</FormLabel>
                       <FormControl>
                         <Input
@@ -336,7 +336,7 @@ export const PerfilForm: React.FC = () => {
                   control={form.control}
                   name="password"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="px-2">
                       <FormLabel>Nova senha</FormLabel>
                       <FormControl>
                         <Input
@@ -355,7 +355,7 @@ export const PerfilForm: React.FC = () => {
                   control={form.control}
                   name="confirmPassword"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="px-2">
                       <FormLabel>Comfirmar nova senha</FormLabel>
                       <FormControl>
                         <Input

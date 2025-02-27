@@ -128,7 +128,7 @@ export default function UserRegisterForm({ setButton }: UserRegisterFormProps) {
             control={form.control}
             name="nome"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="px-2">
                 <FormLabel>Nome</FormLabel>
                 <FormControl>
                   <Input
@@ -146,7 +146,7 @@ export default function UserRegisterForm({ setButton }: UserRegisterFormProps) {
             control={form.control}
             name="email"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="px-2">
                 <FormLabel>Email</FormLabel>
                 <FormControl>
                   <Input
@@ -164,7 +164,7 @@ export default function UserRegisterForm({ setButton }: UserRegisterFormProps) {
             control={form.control}
             name="cpf"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="px-2">
                 <FormLabel>CPF</FormLabel>
                 <FormControl>
                   <Input
@@ -196,7 +196,7 @@ export default function UserRegisterForm({ setButton }: UserRegisterFormProps) {
             control={form.control}
             name="password"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="px-2">
                 <FormLabel>Senha</FormLabel>
                 <FormControl>
                   <Input
@@ -214,7 +214,7 @@ export default function UserRegisterForm({ setButton }: UserRegisterFormProps) {
             control={form.control}
             name="confirmPassword"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="px-2">
                 <FormLabel>Comfirmar senha</FormLabel>
                 <FormControl>
                   <Input
