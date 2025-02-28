@@ -39,7 +39,7 @@ export default function AvaliacoesPage({ idPaciente }: AvaliacoesPageProps) {
       </div>
 
       {Array.isArray(avaliacoes) && avaliacoes.length > 0 ? (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
           {avaliacoes.map((avaliacao) => (
             <Card key={avaliacao._id}>
               <CardHeader>
@@ -53,10 +53,20 @@ export default function AvaliacoesPage({ idPaciente }: AvaliacoesPageProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between pb-4">
                   <span className="text-sm text-muted-foreground">
                     EVA: {avaliacao.escalaEva}
                   </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <Link
+                    href={`/dashboard/pacientes/${idPaciente}/avaliacoes/${avaliacao._id}/acompanhamento`}
+                  >
+                    <Button variant="outline" size="sm">
+                      Acompanhamento
+                    </Button>
+                  </Link>
+
                   <Link
                     href={`/dashboard/pacientes/${idPaciente}/avaliacoes/${avaliacao._id}`}
                   >
