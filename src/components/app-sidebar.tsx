@@ -5,18 +5,11 @@ import {
   Home,
   Settings,
   UserPen,
-  /*   ChevronsLeftRightEllipsisIcon, */
   NotebookPenIcon,
   Users,
   Dumbbell,
   Mail,
-  /*   ClipboardList,
-  ActivitySquare,
-  Calendar, */
-  /* + */
   FileCheckIcon,
-
-  /*  CircleDollarSign, */
 } from 'lucide-react'
 import { signOut, useSession } from 'next-auth/react'
 import { useState } from 'react'
@@ -47,7 +40,6 @@ import {
   CollapsibleTrigger,
 } from './ui/collapsible'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
-/* import type { Id } from '../../convex/_generated/dataModel' */
 import { Skeleton } from './ui/skeleton'
 
 // Menu items.
@@ -72,22 +64,6 @@ const items = [
     url: '/dashboard/arquivos',
     icon: FileCheckIcon,
   },
-
-  /*   {
-    title: 'Avaliações',
-    url: '/dashboard/avaliacoes',
-    icon: ClipboardList,
-  },
-  {
-    title: 'Evolução',
-    url: '/dashboard/evolucao',
-    icon: ActivitySquare,
-  },
-  {
-    title: 'Agenda',
-    url: '/dashboard/agenda',
-    icon: Calendar,
-  }, */
 ]
 const itemsAdm = [
   {
@@ -115,24 +91,7 @@ const itemsAdm = [
     url: '/dashboard/arquivosupload',
     icon: FileCheckIcon,
   },
-  /*   {
-    title: 'Configurar WhatsApp',
-    url: '/dashboard/configwhatsapp',
-    icon: ChevronsLeftRightEllipsisIcon,
-  }, */
 ]
-
-/* interface Usuario {
-  _id: Id<'user'>
-  _creationTime: number
-  image?: string | undefined
-  data_nascimento?: number | undefined
-  role: 'user' | 'admin'
-  nome: string
-  email: string
-  provider: string
-  password: string
-} */
 
 export function AppSidebar() {
   const { data: session } = useSession()
@@ -140,8 +99,6 @@ export function AppSidebar() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [carregou, setiscarregou] = useState(false)
   if (session) {
-    /*     console.log(session) */
-
     if (!carregou) {
       if (session.user.role === 'admin') {
         setIsAdmin(true)
@@ -149,38 +106,6 @@ export function AppSidebar() {
       setiscarregou(true)
     }
   }
-
-  /*   const [loadingData, setLoadingData] = useState(true)
-  const [usuario, setUsuario] = useState<Usuario>() */
-  /* 
-  const loadUser = useCallback(async () => {
-    setLoadingData(true)
-
-    if (session) {
-      try {
-        const response = await fetchQuery(api.user.getById, {
-          userId: session?.user.id as Id<'user'>,
-        })
-
-        if (!response) {
-          console.error('Erro ao buscar os dados do usuário:')
-          return
-        }
-
-        setUsuario(response)
-      } catch (error) {
-        console.error('Erro ao buscar os dados do usuário:', error)
-      } finally {
-        setLoadingData(false) // Define o carregamento como concluído
-      }
-    }
-  }, [session])
-
-  useEffect(() => {
-    if (session) {
-      loadUser()
-    }
-  }, [loadUser, session]) */
 
   return (
     <Sidebar variant="floating" collapsible="icon">
@@ -267,9 +192,6 @@ export function AppSidebar() {
                     <span>Perfil</span>
                   </DropdownMenuItem>
                 </a>
-                {/* <DropdownMenuItem>
-                    <span>Billing</span>
-                  </DropdownMenuItem> */}
                 <DropdownMenuItem onClick={() => signOut()}>
                   <span>Sair</span>
                 </DropdownMenuItem>

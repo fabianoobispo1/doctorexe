@@ -10,6 +10,7 @@ import BreadCrumb from '@/components/breadcrumb'
 import { Heading } from '@/components/ui/heading'
 import { Spinner } from '@/components/ui/spinner'
 import { api } from '@/convex/_generated/api'
+import { ProtectedRoute } from '@/components/ProtectedRoute'
 
 import { columns } from './components/columns'
 
@@ -60,29 +61,34 @@ export default function PacientesPage() {
   }
 
   return (
-    <div className="flex-1 space-y-4 p-4 pt-6 ">
-      <BreadCrumb items={breadcrumbItems} />
-      <div className=" flex items-start justify-between gap-4">
-        <Heading title={'Pacientes'} description={'Gerenciar os pacientes.'} />
-        <Link href="/dashboard/pacientes/novo">
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Novo Paciente
-          </Button>
-        </Link>
-      </div>
+    <ProtectedRoute allowedRoles={['admin']}>
+      <div className="flex-1 space-y-4 p-4 pt-6 ">
+        <BreadCrumb items={breadcrumbItems} />
+        <div className=" flex items-start justify-between gap-4">
+          <Heading
+            title={'Pacientes'}
+            description={'Gerenciar os pacientes.'}
+          />
+          <Link href="/dashboard/pacientes/novo">
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Novo Paciente
+            </Button>
+          </Link>
+        </div>
 
-      <DataTable
-        searchKey="nome"
-        columns={columns}
-        data={pacientes}
-        pagination={{
-          pageSize: perPage,
-          pageCount: Math.ceil((total || 0) / perPage),
-          currentPage,
-          onPageChange: handlePageChange,
-        }}
-      />
-    </div>
+        <DataTable
+          searchKey="nome"
+          columns={columns}
+          data={pacientes}
+          pagination={{
+            pageSize: perPage,
+            pageCount: Math.ceil((total || 0) / perPage),
+            currentPage,
+            onPageChange: handlePageChange,
+          }}
+        />
+      </div>
+    </ProtectedRoute>
   )
 }
