@@ -1,6 +1,6 @@
+import { ArquivosUsuario } from '@/components/arquivos-usuario'
 import BreadCrumb from '@/components/breadcrumb'
 import { Heading } from '@/components/ui/heading'
-/* import { TodoList } from '@/components/TodoList' */
 
 const breadcrumbItems = [
   { title: 'Seus arquivos', link: '/dashboard/arquivos' },
@@ -15,7 +15,7 @@ export default function page() {
           description={'Esse e seus arquivos.'}
         />
       </div>
-      {/* <TodoList /> */}
+      <ArquivosUsuario />
     </div>
   )
 }

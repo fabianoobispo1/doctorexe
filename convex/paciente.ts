@@ -30,6 +30,13 @@ export const create = mutation({
   },
 })
 
+export const getAll = query({
+  handler: async ({ db }) => {
+    const pacientes = await db.query('paciente').order('desc').collect()
+    return pacientes
+  },
+})
+
 export const getByEmailInicial = query({
   args: {
     email: v.string(),

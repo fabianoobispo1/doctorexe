@@ -45,6 +45,7 @@ export const pacienteSchema = {
   estadoCivil: v.string(),
   created_at: v.number(), // Timestamp para data de criação
   // Relacionamentos serão implementados como IDs
+  arquivos: v.optional(v.array(v.id('arquivo'))),
   avaliacoes: v.optional(v.array(v.id('avaliacaoFisio'))),
   exercicios: v.optional(v.array(v.id('patientExercise'))),
 }
@@ -106,6 +107,15 @@ export const faleConoscoSchema = {
   updated_at: v.number(),
 }
 
+export const arquivosSchema = {
+  nome: v.string(),
+  url: v.string(),
+  key: v.string(),
+  created_at: v.number(),
+  updated_at: v.number(),
+  pacienteId: v.id('paciente'),
+}
+
 export default defineSchema({
   user: defineTable(userSchema)
     .index('by_email', ['email'])
@@ -127,4 +137,5 @@ export default defineSchema({
   evolucao: defineTable(evolucaoSchema)
     .index('by_avaliacao', ['avaliacaoId'])
     .index('by_data', ['data']),
+  arquivos: defineTable(arquivosSchema).index('by_paciente', ['pacienteId']),
 })

@@ -1,7 +1,7 @@
+import { ArquivosClient } from '@/components/arquivos-client'
 import BreadCrumb from '@/components/breadcrumb'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { Heading } from '@/components/ui/heading'
-/* import { TodoList } from '@/components/TodoList' */
 
 const breadcrumbItems = [
   { title: 'Adicionar arquivos', link: '/dashboard/arquivosupload' },
@@ -17,7 +17,7 @@ export default function page() {
             description={'Aqui você pode adicionar arquivos para os pacientea.'}
           />
         </div>
-        {/*       <TodoList /> */}
+        <ArquivosClient />
       </div>
     </ProtectedRoute>
   )
