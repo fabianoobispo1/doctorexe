@@ -14,6 +14,7 @@ import {
   ActivitySquare,
   Calendar, */
   /* + */
+  FileCheckIcon,
 
   /*  CircleDollarSign, */
 } from 'lucide-react'
@@ -66,6 +67,11 @@ const items = [
     url: '/dashboard/perfil',
     icon: UserPen,
   },
+  {
+    title: 'Seus arquivos',
+    url: '/dashboard/arquivos',
+    icon: FileCheckIcon,
+  },
 
   /*   {
     title: 'Avaliações',
@@ -103,6 +109,11 @@ const itemsAdm = [
     title: 'Fale conosco',
     url: '/dashboard/fale-conosco',
     icon: Mail,
+  },
+  {
+    title: 'Adicionar arquivos',
+    url: '/dashboard/arquivosupload',
+    icon: FileCheckIcon,
   },
   /*   {
     title: 'Configurar WhatsApp',
