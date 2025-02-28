@@ -81,6 +81,7 @@ const itemsAdm = [
     url: '/dashboard/exercicios',
     icon: Dumbbell,
   },
+
   {
     title: 'Fale conosco',
     url: '/dashboard/fale-conosco',
