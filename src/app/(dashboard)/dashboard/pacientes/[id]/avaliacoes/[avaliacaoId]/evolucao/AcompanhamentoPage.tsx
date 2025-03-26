@@ -50,7 +50,7 @@ export default function AcompanhementoPage({
 
   const handleEditClick = (evolucaoId: Id<'evolucao'>) => {
     router.push(
-      `/dashboard/pacientes/${idPaciente}/avaliacoes/${idAvaliacao}/acompanhamento/editar/${evolucaoId}`,
+      `/dashboard/pacientes/${idPaciente}/avaliacoes/${idAvaliacao}/evolucao/editar/${evolucaoId}`,
     )
   }
 
@@ -85,14 +85,14 @@ export default function AcompanhementoPage({
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
-          <h1 className="text-3xl font-bold tracking-tight">Acompanhamento</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Evolução</h1>
         </div>
         <Link
-          href={`/dashboard/pacientes/${idPaciente}/avaliacoes/${idAvaliacao}/acompanhamento/nova`}
+          href={`/dashboard/pacientes/${idPaciente}/avaliacoes/${idAvaliacao}/evolucao/nova`}
         >
           <Button>
             <Plus className="mr-2 h-4 w-4" />
-            Nova Consulta
+            Nova Evolução
           </Button>
         </Link>
       </div>

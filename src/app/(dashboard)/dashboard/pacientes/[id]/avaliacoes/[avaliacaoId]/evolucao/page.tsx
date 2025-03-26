@@ -3,7 +3,7 @@ import { Metadata } from 'next'
 import AcompanhementoPage from './AcompanhamentoPage'
 
 export const metadata: Metadata = {
-  title: 'Acompanhamento | DoctorExe',
+  title: 'Evolução | DoctorExe',
   description: '...',
 }
 

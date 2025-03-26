@@ -60,10 +60,10 @@ export default function AvaliacoesPage({ idPaciente }: AvaliacoesPageProps) {
                 </div>
                 <div className="flex items-center justify-between">
                   <Link
-                    href={`/dashboard/pacientes/${idPaciente}/avaliacoes/${avaliacao._id}/acompanhamento`}
+                    href={`/dashboard/pacientes/${idPaciente}/avaliacoes/${avaliacao._id}/evolucao`}
                   >
                     <Button variant="outline" size="sm">
-                      Acompanhamento
+                      Evolução
                     </Button>
                   </Link>
 

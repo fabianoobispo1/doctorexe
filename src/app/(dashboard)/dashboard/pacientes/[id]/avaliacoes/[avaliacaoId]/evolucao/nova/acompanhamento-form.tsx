@@ -120,7 +120,7 @@ export function AcompanhamnetoForm({
       }
 
       router.push(
-        `/dashboard/pacientes/${idPaciente}/avaliacoes/${idAvaliacao}/acompanhamento`,
+        `/dashboard/pacientes/${idPaciente}/avaliacoes/${idAvaliacao}/evolucao`,
       )
     } catch (error) {
       const errorMessage = axios.isAxiosError(error)
@@ -186,7 +186,7 @@ export function AcompanhamnetoForm({
                 variant="outline"
                 onClick={() =>
                   router.push(
-                    `/dashboard/pacientes/${idPaciente}/avaliacoes/${idAvaliacao}/acompanhamento`,
+                    `/dashboard/pacientes/${idPaciente}/avaliacoes/${idAvaliacao}/evolucao`,
                   )
                 }
               >

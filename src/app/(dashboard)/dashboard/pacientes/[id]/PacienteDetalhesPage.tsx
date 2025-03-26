@@ -150,6 +150,9 @@ export default function PacienteDetalhesPage({
                 <Link href={`/dashboard/pacientes/${paciente._id}/avaliacoes`}>
                   <Button className="w-full">Avaliações</Button>
                 </Link>
+                {/* <Link href={`/dashboard/pacientes/${paciente._id}/evolucao`}>
+                  <Button className="w-full">Evolução</Button>
+                </Link> */}
                 {/*    <Link href={`/dashboard/pacientes/${paciente._id}/historico`}>
                   <Button variant="outline" className="w-full">
                     Ver Histórico
