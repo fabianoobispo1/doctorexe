@@ -23,3 +23,19 @@ export const getEvolucaoByAvaliacao = query({
     return evolucoes
   },
 })
+
+export const remove = mutation({
+  args: {
+    evolucaoId: v.id('evolucao'),
+  },
+  handler: async ({ db }, { evolucaoId }) => {
+    const evolucao = await db.get(evolucaoId)
+    if (!evolucao) {
+      throw new Error('Evolução não encontrada')
+    }
+
+    await db.delete(evolucaoId)
+
+    return { success: true, message: 'Evolução removida com sucesso' }
+  },
+})
