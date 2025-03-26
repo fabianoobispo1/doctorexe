@@ -1,8 +1,9 @@
 'use client'
 import Link from 'next/link'
-import { ArrowLeft, Plus, Trash2 } from 'lucide-react'
+import { ArrowLeft, Plus, Trash2, Edit } from 'lucide-react'
 import { useQuery, useMutation } from 'convex/react'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -30,6 +31,7 @@ export default function AcompanhementoPage({
   idPaciente,
   idAvaliacao,
 }: AvaliacoesPageProps) {
+  const router = useRouter()
   const { toast } = useToast()
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [evolucaoToDelete, setEvolucaoToDelete] =
@@ -46,6 +48,12 @@ export default function AcompanhementoPage({
     setIsDeleteDialogOpen(true)
   }
 
+  const handleEditClick = (evolucaoId: Id<'evolucao'>) => {
+    router.push(
+      `/dashboard/pacientes/${idPaciente}/avaliacoes/${idAvaliacao}/acompanhamento/editar/${evolucaoId}`,
+    )
+  }
+
   const confirmDelete = async () => {
     if (!evolucaoToDelete) return
 
@@ -56,7 +64,7 @@ export default function AcompanhementoPage({
         description: 'Consulta removida com sucesso',
       })
     } catch (error) {
-      console.error('Erro ao remover a consulta:', error)
+      console.error(error)
       toast({
         title: 'Erro',
         description: 'Não foi possível remover a consulta',
@@ -102,14 +110,24 @@ export default function AcompanhementoPage({
                         {new Date(evolucao.data).toLocaleDateString('pt-BR')}
                       </span>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-destructive hover:bg-destructive/10"
-                      onClick={() => handleDeleteClick(evolucao._id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-primary hover:bg-primary/10"
+                        onClick={() => handleEditClick(evolucao._id)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-destructive hover:bg-destructive/10"
+                        onClick={() => handleDeleteClick(evolucao._id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>

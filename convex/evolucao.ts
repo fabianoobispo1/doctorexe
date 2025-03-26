@@ -39,3 +39,34 @@ export const remove = mutation({
     return { success: true, message: 'Evolução removida com sucesso' }
   },
 })
+// Adicione esta função ao seu arquivo evolucao.ts existente
+export const update = mutation({
+  args: {
+    evolucaoId: v.id('evolucao'),
+    data: v.number(),
+    descricao: v.string(),
+  },
+  handler: async ({ db }, { evolucaoId, data, descricao }) => {
+    const evolucao = await db.get(evolucaoId)
+    if (!evolucao) {
+      throw new Error('Evolução não encontrada')
+    }
+
+    await db.patch(evolucaoId, {
+      data,
+      descricao,
+    })
+
+    return { success: true, message: 'Evolução atualizada com sucesso' }
+  },
+})
+
+// Adicione também uma função para buscar uma evolução específica
+export const getById = query({
+  args: {
+    evolucaoId: v.id('evolucao'),
+  },
+  handler: async ({ db }, { evolucaoId }) => {
+    return await db.get(evolucaoId)
+  },
+})
