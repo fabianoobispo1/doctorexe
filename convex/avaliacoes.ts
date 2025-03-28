@@ -49,3 +49,71 @@ export const remove = mutation({
     return { success: true, message: 'Avaliação removida com sucesso' }
   },
 })
+
+export const update = mutation({
+  args: {
+    avaliacaoId: v.id('avaliacaoFisio'),
+    dataAvaliacao: v.number(),
+    altura: v.number(),
+    peso: v.number(),
+    pressaoArterial: v.string(),
+    frequenciaCardiaca: v.number(),
+    diagnosticoFisioterapeutico: v.string(),
+    apresentacaoPaciente: v.string(),
+    examesComplementares: v.string(),
+    inspecaoPalpacao: v.string(),
+    semiologia: v.string(),
+    testesEspecificos: v.string(),
+    escalaEva: v.number(),
+    objetivosTratamento: v.string(),
+    recursosTerapeuticos: v.string(),
+    planoTratamento: v.string(),
+    updated_at: v.number(),
+  },
+  handler: async (
+    { db },
+    {
+      avaliacaoId,
+      dataAvaliacao,
+      altura,
+      peso,
+      pressaoArterial,
+      frequenciaCardiaca,
+      diagnosticoFisioterapeutico,
+      apresentacaoPaciente,
+      examesComplementares,
+      inspecaoPalpacao,
+      semiologia,
+      testesEspecificos,
+      escalaEva,
+      objetivosTratamento,
+      recursosTerapeuticos,
+      planoTratamento,
+    },
+  ) => {
+    const avaliacao = await db.get(avaliacaoId)
+    if (!avaliacao) {
+      throw new Error('Evolução não encontrada')
+    }
+
+    await db.patch(avaliacaoId, {
+      dataAvaliacao,
+      altura,
+      peso,
+      pressaoArterial,
+      frequenciaCardiaca,
+      diagnosticoFisioterapeutico,
+      apresentacaoPaciente,
+      examesComplementares,
+      inspecaoPalpacao,
+      semiologia,
+      testesEspecificos,
+      escalaEva,
+      objetivosTratamento,
+      recursosTerapeuticos,
+      planoTratamento,
+    })
+
+    return { success: true, message: 'Avaliação atualizada com sucesso' }
+  },
+})

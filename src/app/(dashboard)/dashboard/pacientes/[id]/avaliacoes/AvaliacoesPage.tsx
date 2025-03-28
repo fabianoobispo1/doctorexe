@@ -1,7 +1,8 @@
 'use client'
 import Link from 'next/link'
-import { ArrowLeft, Plus } from 'lucide-react'
+import { ArrowLeft, Edit, Plus } from 'lucide-react'
 import { useQuery } from 'convex/react'
+import { useRouter } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -16,6 +17,13 @@ export default function AvaliacoesPage({ idPaciente }: AvaliacoesPageProps) {
   const avaliacoes = useQuery(api.avaliacoes.getByID, {
     pacienteId: idPaciente as Id<'paciente'>,
   }) as Doc<'avaliacaoFisio'>[] | undefined
+  const router = useRouter()
+
+  const handleEditClick = (avaliacaoId: Id<'avaliacaoFisio'>) => {
+    router.push(
+      `/dashboard/pacientes/${idPaciente}/avaliacoes/editar/${avaliacaoId}`,
+    )
+  }
 
   return (
     <div className="flex flex-col gap-4 p-6">
@@ -45,11 +53,21 @@ export default function AvaliacoesPage({ idPaciente }: AvaliacoesPageProps) {
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <span>Avaliação Fisioterápica</span>
-                  <span className="text-sm text-muted-foreground">
-                    {new Date(avaliacao.dataAvaliacao).toLocaleDateString(
-                      'pt-BR',
-                    )}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">
+                      {new Date(avaliacao.dataAvaliacao).toLocaleDateString(
+                        'pt-BR',
+                      )}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-primary hover:bg-primary/10"
+                      onClick={() => handleEditClick(avaliacao._id)}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </CardTitle>
               </CardHeader>
               <CardContent>

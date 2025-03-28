@@ -32,6 +32,8 @@ export const todoSchema = {
 export const pacienteSchema = {
   nome: v.string(),
   cpf: v.optional(v.string()),
+  rg: v.optional(v.string()),
+  cnh: v.optional(v.string()),
   dataNascimento: v.number(), // No Convex usamos timestamp
   telefone: v.string(),
   email: v.string(),
@@ -39,8 +41,13 @@ export const pacienteSchema = {
   cidade: v.string(),
   bairro: v.string(),
   empresa: v.string(),
+  plano: v.optional(v.string()),
   enderecoResidencial: v.string(),
+  profissao: v.optional(v.string()),
   enderecoComercial: v.string(),
+  nomeContatoEmergencia: v.optional(v.string()),
+  telefoneContatoEmergencia: v.optional(v.string()),
+  escolaridade: v.optional(v.string()),
   naturalidade: v.string(),
   estadoCivil: v.string(),
   created_at: v.number(), // Timestamp para data de criação

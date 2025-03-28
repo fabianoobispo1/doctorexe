@@ -51,6 +51,17 @@ const formSchema = z.object({
   enderecoComercial: z.string().optional(),
   naturalidade: z.string().min(2, 'Naturalidade é obrigatória'),
   estadoCivil: z.string().min(2, 'Estado civil é obrigatório'),
+  nomeContatoEmergencia: z
+    .string()
+    .min(2, 'Nome do contato de emergência é obrigatório'),
+  telefoneContatoEmergencia: z
+    .string()
+    .min(10, 'Telefone do contato de emergência é inválido'),
+  profissao: z.string(),
+  escolaridade: z.string(),
+  plano: z.string(),
+  rg: z.string(),
+  cnh: z.string(),
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -80,6 +91,13 @@ export function PacienteForm({ pacienteId }: PacienteFormProps) {
       enderecoComercial: '',
       naturalidade: '',
       estadoCivil: '',
+      nomeContatoEmergencia: '',
+      telefoneContatoEmergencia: '',
+      profissao: '',
+      escolaridade: '',
+      plano: '',
+      rg: '',
+      cnh: '',
     },
   })
 
@@ -110,6 +128,13 @@ export function PacienteForm({ pacienteId }: PacienteFormProps) {
               enderecoComercial: response.enderecoComercial,
               naturalidade: response.naturalidade,
               estadoCivil: response.estadoCivil,
+              nomeContatoEmergencia: response.nomeContatoEmergencia,
+              telefoneContatoEmergencia: response.telefoneContatoEmergencia,
+              profissao: response.profissao,
+              escolaridade: response.escolaridade,
+              plano: response.plano,
+              rg: response.rg,
+              cnh: response.cnh,
             }
 
             form.reset(formattedData)
@@ -151,6 +176,13 @@ export function PacienteForm({ pacienteId }: PacienteFormProps) {
           enderecoComercial: data.enderecoComercial || '', // Fornece valor padrão vazio
           naturalidade: data.naturalidade,
           estadoCivil: data.estadoCivil,
+          nomeContatoEmergencia: data.nomeContatoEmergencia,
+          telefoneContatoEmergencia: data.telefoneContatoEmergencia,
+          profissao: data.profissao,
+          escolaridade: data.escolaridade,
+          plano: data.plano,
+          rg: data.rg,
+          cnh: data.cnh,
         }
 
         await updatePaciente(dataToSend)
@@ -178,6 +210,13 @@ export function PacienteForm({ pacienteId }: PacienteFormProps) {
           created_at: Date.now(),
           avaliacoes: [],
           exercicios: [],
+          nomeContatoEmergencia: data.nomeContatoEmergencia,
+          telefoneContatoEmergencia: data.telefoneContatoEmergencia,
+          profissao: data.profissao,
+          escolaridade: data.escolaridade,
+          plano: data.plano,
+          rg: data.rg,
+          cnh: data.cnh,
         }
         await createPaciente(dataToSend)
 
@@ -197,7 +236,7 @@ export function PacienteForm({ pacienteId }: PacienteFormProps) {
 
     setLoading(false)
 
-    // router.push('/dashboard/pacientes')
+    router.push('/dashboard/pacientes')
   }
 
   return (
@@ -215,223 +254,325 @@ export function PacienteForm({ pacienteId }: PacienteFormProps) {
       <ScrollArea className="h-[calc(100vh-170px)]  w-full pr-4">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="id"
-              render={({ field }) => (
-                <FormItem className=" flex-col hidden ">
-                  <FormLabel>id</FormLabel>
-                  <FormControl>
-                    <Input disabled={loading} placeholder="id" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="nome"
-              render={({ field }) => (
-                <FormItem className="px-2">
-                  <FormLabel>Nome Completo</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Nome do paciente" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="cpf"
-              render={({ field }) => (
-                <FormItem className="px-2">
-                  <FormLabel>CPF</FormLabel>
-                  <FormControl>
-                    <Input
-                      disabled={loading}
-                      placeholder="000.000.000-00"
-                      value={formatCPF(field.value)}
-                      onChange={(e) =>
-                        field.onChange(formatCPF(e.target.value))
-                      }
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="dataNascimento"
-              render={({ field }) => (
-                <FormItem className="px-2">
-                  <FormLabel>Data de Nascimento</FormLabel>
-                  <FormControl>
-                    <Input type="date" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="telefone"
-              render={({ field }) => (
-                <FormItem className="px-2">
-                  <FormLabel>Telefone</FormLabel>
-                  <FormControl>
-                    <Input placeholder="(00) 00000-0000" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem className="px-2">
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input placeholder="email@email.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="sexo"
-              render={({ field }) => (
-                <FormItem className="px-2">
-                  <FormLabel>Sexo</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+            <div className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <FormField
+                control={form.control}
+                name="id"
+                render={({ field }) => (
+                  <FormItem className=" flex-col hidden ">
+                    <FormLabel>id</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione o sexo" />
-                      </SelectTrigger>
+                      <Input disabled={loading} placeholder="id" {...field} />
                     </FormControl>
-                    <SelectContent>
-                      <SelectItem value="masculino">Masculino</SelectItem>
-                      <SelectItem value="feminino">Feminino</SelectItem>
-                      <SelectItem value="outro">Outro</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="cidade"
-              render={({ field }) => (
-                <FormItem className="px-2">
-                  <FormLabel>Cidade</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Cidade" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="nome"
+                render={({ field }) => (
+                  <FormItem className="px-2">
+                    <FormLabel>Nome Completo</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Nome do paciente" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="bairro"
-              render={({ field }) => (
-                <FormItem className="px-2">
-                  <FormLabel>Bairro</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Bairro" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="cpf"
+                render={({ field }) => (
+                  <FormItem className="px-2">
+                    <FormLabel>CPF</FormLabel>
+                    <FormControl>
+                      <Input
+                        disabled={loading}
+                        placeholder="000.000.000-00"
+                        value={formatCPF(field.value)}
+                        onChange={(e) =>
+                          field.onChange(formatCPF(e.target.value))
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="empresa"
-              render={({ field }) => (
-                <FormItem className="px-2">
-                  <FormLabel>Empresa</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Empresa" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="dataNascimento"
+                render={({ field }) => (
+                  <FormItem className="px-2">
+                    <FormLabel>Data de Nascimento</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="enderecoResidencial"
-              render={({ field }) => (
-                <FormItem className="px-2">
-                  <FormLabel>Endereço Residencial</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Endereço Residencial" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="telefone"
+                render={({ field }) => (
+                  <FormItem className="px-2">
+                    <FormLabel>Telefone</FormLabel>
+                    <FormControl>
+                      <Input placeholder="(00) 00000-0000" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="enderecoComercial"
-              render={({ field }) => (
-                <FormItem className="px-2">
-                  <FormLabel>Endereço Comercial</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Endereço Comercial (opcional)"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem className="px-2">
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input placeholder="email@email.com" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="naturalidade"
-              render={({ field }) => (
-                <FormItem className="px-2">
-                  <FormLabel>Naturalidade</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Naturalidade" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="sexo"
+                render={({ field }) => (
+                  <FormItem className="px-2">
+                    <FormLabel>Sexo</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o sexo" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="masculino">Masculino</SelectItem>
+                        <SelectItem value="feminino">Feminino</SelectItem>
+                        <SelectItem value="outro">Outro</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="estadoCivil"
-              render={({ field }) => (
-                <FormItem className="px-2">
-                  <FormLabel>Estado Civil</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Estado Civil" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="cidade"
+                render={({ field }) => (
+                  <FormItem className="px-2">
+                    <FormLabel>Cidade</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Cidade" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="bairro"
+                render={({ field }) => (
+                  <FormItem className="px-2">
+                    <FormLabel>Bairro</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Bairro" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="empresa"
+                render={({ field }) => (
+                  <FormItem className="px-2">
+                    <FormLabel>Empresa</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Empresa" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="enderecoResidencial"
+                render={({ field }) => (
+                  <FormItem className="px-2">
+                    <FormLabel>Endereço Residencial</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Endereço Residencial" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="enderecoComercial"
+                render={({ field }) => (
+                  <FormItem className="px-2">
+                    <FormLabel>Endereço Comercial</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Endereço Comercial (opcional)"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="naturalidade"
+                render={({ field }) => (
+                  <FormItem className="px-2">
+                    <FormLabel>Naturalidade</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Naturalidade" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="estadoCivil"
+                render={({ field }) => (
+                  <FormItem className="px-2">
+                    <FormLabel>Estado Civil</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Estado Civil" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="nomeContatoEmergencia"
+                render={({ field }) => (
+                  <FormItem className="px-2">
+                    <FormLabel>Nome do Contato de Emergência</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Nome do contato de emergência"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="telefoneContatoEmergencia"
+                render={({ field }) => (
+                  <FormItem className="px-2">
+                    <FormLabel>Telefone de Emergência</FormLabel>
+                    <FormControl>
+                      <Input placeholder="(00) 00000-0000" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="profissao"
+                render={({ field }) => (
+                  <FormItem className="px-2">
+                    <FormLabel>Profissão</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Profissão" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="escolaridade"
+                render={({ field }) => (
+                  <FormItem className="px-2">
+                    <FormLabel>Escolaridade</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Escolaridade" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="plano"
+                render={({ field }) => (
+                  <FormItem className="px-2">
+                    <FormLabel>Plano de Saúde</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Plano de saúde" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="rg"
+                render={({ field }) => (
+                  <FormItem className="px-2">
+                    <FormLabel>RG</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Número do RG" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="cnh"
+                render={({ field }) => (
+                  <FormItem className="px-2">
+                    <FormLabel>CNH</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Número da CNH" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <div className="flex justify-end gap-4">
               <Button

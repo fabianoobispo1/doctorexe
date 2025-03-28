@@ -1,7 +1,8 @@
 'use client'
 import Link from 'next/link'
-import { ArrowLeft, Printer, Trash } from 'lucide-react'
+import { ArrowLeft, Edit, Printer, Trash } from 'lucide-react'
 import { useQuery, useMutation } from 'convex/react'
+import { useRouter } from 'next/navigation'
 
 import { useToast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
@@ -25,7 +26,7 @@ export default function AvaliacoesDetalhePage({
   const evolucoes = useQuery(api.evolucao.getEvolucaoByAvaliacao, {
     avaliacaoId: idAvaliacao as Id<'avaliacaoFisio'>,
   }) as Doc<'evolucao'>[] | undefined
-
+  const router = useRouter()
   const { toast } = useToast()
   const remove = useMutation(api.avaliacoes.remove)
 
@@ -47,6 +48,12 @@ export default function AvaliacoesDetalhePage({
     }
   }
 
+  const handleEditClick = (avaliacaoId: string) => {
+    router.push(
+      `/dashboard/pacientes/${idPaciente}/avaliacoes/editar/${avaliacaoId}`,
+    )
+  }
+
   if (!avaliacao) {
     return <div>Carregando...</div>
   }
@@ -65,6 +72,13 @@ export default function AvaliacoesDetalhePage({
           </h1>
         </div>
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={() => handleEditClick(idAvaliacao)}
+          >
+            <Edit className="mr-2 h-4 w-4" />
+            Editar
+          </Button>
           <Button variant="outline">
             <Printer className="mr-2 h-4 w-4" />
             Imprimir

@@ -119,6 +119,13 @@ export const UpdatePaciente = mutation({
     enderecoComercial: v.optional(v.string()),
     naturalidade: v.optional(v.string()),
     estadoCivil: v.optional(v.string()),
+    nomeContatoEmergencia: v.optional(v.string()),
+    telefoneContatoEmergencia: v.optional(v.string()),
+    profissao: v.optional(v.string()),
+    escolaridade: v.optional(v.string()),
+    plano: v.optional(v.string()),
+    rg: v.optional(v.string()),
+    cnh: v.optional(v.string()),
   },
   handler: async ({ db }, args) => {
     const paciente = await db.get(args.pacienteId)
@@ -140,6 +147,13 @@ export const UpdatePaciente = mutation({
       enderecoComercial: args.enderecoComercial,
       naturalidade: args.naturalidade,
       estadoCivil: args.estadoCivil,
+      nomeContatoEmergencia: args.nomeContatoEmergencia,
+      telefoneContatoEmergencia: args.telefoneContatoEmergencia,
+      profissao: args.profissao,
+      escolaridade: args.escolaridade,
+      plano: args.plano,
+      rg: args.rg,
+      cnh: args.cnh,
     })
 
     return updatePaciente

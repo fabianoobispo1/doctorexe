@@ -5,7 +5,8 @@ import { useForm } from 'react-hook-form'
 import * as z from 'zod'
 import { useRouter } from 'next/navigation'
 import axios from 'axios'
-import { useMutation } from 'convex/react'
+import { useMutation, useQuery } from 'convex/react'
+import { useEffect } from 'react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -25,10 +26,10 @@ import type { Id } from '@/convex/_generated/dataModel'
 
 const formSchema = z.object({
   dataAvaliacao: z.string(),
-  altura: z.number().min(0),
-  peso: z.number().min(0),
+  altura: z.number(),
+  peso: z.number(),
   pressaoArterial: z.string(),
-  frequenciaCardiaca: z.number().min(0),
+  frequenciaCardiaca: z.number(),
   diagnosticoFisioterapeutico: z.string(),
   semiologia: z.string(),
   testesEspecificos: z.string(),
@@ -42,54 +43,130 @@ type FormValues = z.infer<typeof formSchema>
 
 interface AvaliacaoFormProps {
   pacienteId: string
+  avaliacaoId?: string
+  isEditing?: boolean
 }
 
-export function AvaliacaoForm({ pacienteId }: AvaliacaoFormProps) {
+export function AvaliacaoForm({
+  pacienteId,
+  avaliacaoId,
+  isEditing = false,
+}: AvaliacaoFormProps) {
   const router = useRouter()
   const { toast } = useToast()
 
   const createAvaliacao = useMutation(api.avaliacoes.create)
+  const updateAvaliacao = useMutation(api.avaliacoes.update)
+
+  // Buscar dados da evolução se estiver editando
+  const avaliacaoData = useQuery(
+    api.avaliacoes.getAvaliacaoById,
+    isEditing && avaliacaoId
+      ? { avaliacaoId: avaliacaoId as Id<'avaliacaoFisio'> }
+      : 'skip',
+  )
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       dataAvaliacao: new Date().toISOString().split('T')[0],
+      altura: 0, // Add default values for all fields
+      peso: 0,
+      pressaoArterial: '',
+      frequenciaCardiaca: 0,
+      diagnosticoFisioterapeutico: '',
+      semiologia: '',
+      testesEspecificos: '',
+      escalaEva: 0,
+      objetivosTratamento: '',
+      recursosTerapeuticos: '',
+      planoTratamento: '',
     },
   })
 
+  // Preencher o formulário com os dados existentes quando estiver editando
+  useEffect(() => {
+    if (isEditing && avaliacaoData) {
+      const dataFormatada = new Date(avaliacaoData.dataAvaliacao)
+        .toISOString()
+        .split('T')[0]
+
+      form.reset({
+        dataAvaliacao: dataFormatada,
+        altura: avaliacaoData.altura,
+        peso: avaliacaoData.peso,
+        pressaoArterial: avaliacaoData.pressaoArterial,
+        frequenciaCardiaca: avaliacaoData.frequenciaCardiaca,
+        diagnosticoFisioterapeutico: avaliacaoData.diagnosticoFisioterapeutico,
+        semiologia: avaliacaoData.semiologia,
+        testesEspecificos: avaliacaoData.testesEspecificos,
+        escalaEva: avaliacaoData.escalaEva,
+        objetivosTratamento: avaliacaoData.objetivosTratamento,
+        recursosTerapeuticos: avaliacaoData.recursosTerapeuticos,
+        planoTratamento: avaliacaoData.planoTratamento,
+      })
+    }
+  }, [avaliacaoData, form, isEditing])
+
   async function onSubmit(data: FormValues) {
     try {
-      // Aqui virá a integração com a API
-      console.log({ pacienteId, ...data })
+      if (isEditing && avaliacaoId) {
+        await updateAvaliacao({
+          avaliacaoId: avaliacaoId as Id<'avaliacaoFisio'>,
+          dataAvaliacao: Date.now(),
+          altura: data.altura,
+          peso: data.peso,
+          pressaoArterial: data.pressaoArterial,
+          frequenciaCardiaca: data.frequenciaCardiaca,
+          diagnosticoFisioterapeutico: data.diagnosticoFisioterapeutico,
+          apresentacaoPaciente: JSON.stringify({}),
+          examesComplementares: JSON.stringify({}),
+          inspecaoPalpacao: JSON.stringify({}),
+          semiologia: data.semiologia,
+          testesEspecificos: data.testesEspecificos,
+          escalaEva: data.escalaEva,
+          objetivosTratamento: data.objetivosTratamento,
+          recursosTerapeuticos: data.recursosTerapeuticos,
+          planoTratamento: data.planoTratamento,
+          updated_at: Date.now(),
+        })
 
-      const avaliacaoData = {
-        dataAvaliacao: Date.now(), // Converter para timestamp
-        altura: data.altura,
-        peso: data.peso,
-        pressaoArterial: data.pressaoArterial,
-        frequenciaCardiaca: data.frequenciaCardiaca,
-        diagnosticoFisioterapeutico: data.diagnosticoFisioterapeutico,
-        apresentacaoPaciente: {}, // Adicionar campo JSON
-        examesComplementares: {}, // Adicionar campo JSON
-        inspecaoPalpacao: {}, // Adicionar campo JSON
-        semiologia: data.semiologia,
-        testesEspecificos: data.testesEspecificos,
-        escalaEva: data.escalaEva,
-        objetivosTratamento: data.objetivosTratamento,
-        recursosTerapeuticos: data.recursosTerapeuticos,
-        planoTratamento: data.planoTratamento,
-        created_at: Date.now(),
-        updated_at: Date.now(),
-        pacienteId: pacienteId as Id<`paciente`>,
+        toast({
+          title: 'Sucesso',
+          description: 'Avaliação atualizada com sucesso!',
+        })
+
+        router.push(`/dashboard/pacientes/${pacienteId}/avaliacoes`)
+      } else {
+        const avaliacaoData = {
+          dataAvaliacao: Date.now(),
+          altura: data.altura,
+          peso: data.peso,
+          pressaoArterial: data.pressaoArterial,
+          frequenciaCardiaca: data.frequenciaCardiaca,
+          diagnosticoFisioterapeutico: data.diagnosticoFisioterapeutico,
+          apresentacaoPaciente: JSON.stringify({}),
+          examesComplementares: JSON.stringify({}),
+          inspecaoPalpacao: JSON.stringify({}),
+          semiologia: data.semiologia,
+          testesEspecificos: data.testesEspecificos,
+          escalaEva: data.escalaEva,
+          objetivosTratamento: data.objetivosTratamento,
+          recursosTerapeuticos: data.recursosTerapeuticos,
+          planoTratamento: data.planoTratamento,
+          created_at: Date.now(),
+          updated_at: Date.now(),
+          pacienteId: pacienteId as Id<`paciente`>,
+        }
+        await createAvaliacao(avaliacaoData)
+
+        toast({
+          title: 'Sucesso',
+          description: 'Avaliação cadastrada com sucesso!',
+        })
+
+        router.push(`/dashboard/pacientes/${pacienteId}/avaliacoes`)
       }
-      await createAvaliacao(avaliacaoData)
-
-      toast({
-        title: 'Sucesso',
-        description: 'Avaliação cadastrada com sucesso!',
-      })
-
-      router.push(`/dashboard/pacientes/${pacienteId}/avaliacoes`)
     } catch (error) {
       const errorMessage = axios.isAxiosError(error)
         ? error.response?.data?.message || 'Erro Api Avaliação'
@@ -102,7 +179,6 @@ export function AvaliacaoForm({ pacienteId }: AvaliacaoFormProps) {
       })
     }
   }
-
   return (
     <ScrollArea className="h-[calc(100vh-170px)]  w-full pr-4">
       <Form {...form}>

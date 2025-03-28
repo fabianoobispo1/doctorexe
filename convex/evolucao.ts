@@ -39,7 +39,7 @@ export const remove = mutation({
     return { success: true, message: 'Evolução removida com sucesso' }
   },
 })
-// Adicione esta função ao seu arquivo evolucao.ts existente
+
 export const update = mutation({
   args: {
     evolucaoId: v.id('evolucao'),
